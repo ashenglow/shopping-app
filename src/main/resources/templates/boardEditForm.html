@@ -1,0 +1,43 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header}"/>
+<style>
+    .fieldError {
+        border-color: #bd2130;
+    }
+</style>
+<body>
+
+<div class="container">
+    <div th:replace="~{fragments/bodyHeader :: bodyHeader}"/>
+    <form role="form" method="post" th:object="${board}" enctype="multipart/form-data">
+        <input th:type="hidden" th:field="${board.id}" />
+        <div class="form-group">
+            <label th:for="title">title</label>
+            <input th:field="${board.title}" th:type="text" class="form-control">
+        </div>
+        <div class="form-group">
+            <label th:for="content">content</label>
+            <textarea th:type="text" th:field="${board.content}" class="form-control"></textarea>
+        </div>
+        <div class="form-group">
+            <ul>
+<!--                <li>첨부파일<input type="file" th:field="${board.attachFile}" name="attachFile" >-->
+<!--                <a th:if="${not #strings.isEmpty(files.attachFile)}" th:href="|/attach/${board.id}|"-->
+<!--            th:text="${files.attachFile.getOriginalFilename()}"/>-->
+<!--                </li>-->
+                <li>이미지파일<input type="file" th:field="${board.imageFiles}" name="imageFiles" multiple="multiple">
+                <img th:if="${files}" th:each="imageFile : ${files}"
+                     th:src="|/images/${imageFile.getStoreFileName()}|" width="100" height="100">
+                </li>
+            </ul>
+        </div>
+        <button type="submit" class="btn btn-primary">작성</button>
+
+    </form>
+    <br/>
+    <div th:replace="~{fragments/footer :: footer}"/>
+</div>
+
+</body>
+</html>
