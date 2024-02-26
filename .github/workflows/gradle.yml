@@ -12,12 +12,15 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     permissions:
+      id-token: write
       contents: read
 
     steps:
@@ -46,6 +49,34 @@ jobs:
     #
     # - name: Build with Gradle 8.5
     #   run: gradle build
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Make dir
+      run: mkdir cicd
+
+    - name: Copy jar
+      run: cp ./build/libs/*.jar ./cicd
+
+    - name: Copy appspec
+      run: cp ./appspec.yml ./cicd
+
+    - name: Copy script
+      run: cp ./deploy.sh ./cicd
+
+    - name: Make zip
+      run: zip -r -qq -j ./deploy.zip ./cicd
+    - run: ls -al
+
+    - name: Upload S3
+      run: aws s3 cp --region ${{ secrets.AWS_REGION }} ./deploy.zip s3://shopbuild/ci-cd/
+
+    - name: CodeDeploy
+      run: aws deploy create-deployment --application-name shop-app --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name shop --s3-location bucket=shopbuild,bundleType=zip,key=ci-cd/deploy.zip
+
 
   dependency-submission:
 
