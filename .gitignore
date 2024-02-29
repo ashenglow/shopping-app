@@ -44,3 +44,6 @@ out/
 
 ### test폴더 ###
 src/test
+
+### application.yml 설정파일###
+src/main/resources/application.yml
