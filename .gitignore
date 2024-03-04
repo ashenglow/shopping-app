@@ -47,3 +47,4 @@ src/test
 
 ### application.yml 설정파일###
 src/main/resources/application-dev.yml
+src/main/resources/application-prod.yml
