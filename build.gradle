@@ -59,7 +59,7 @@ clean.doLast {
 task copyPrivate(type: Copy){
     copy {
         from './sub'
-        include 'application-prod.yml'
+        include '*.yml'
         into 'src/main/resources'
     }
 }
