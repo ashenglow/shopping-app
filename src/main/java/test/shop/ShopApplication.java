@@ -13,21 +13,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Slf4j
 public class ShopApplication {
 
-    @Value("${server.host.api}")
-    private String host;
-
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-      log.info("host:" + host);
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")
-                        .allowedOrigins(host);
-            }
-        };
-    }
-
     public static void main(String[] args) {
         SpringApplication.run(ShopApplication.class, args);
     }
