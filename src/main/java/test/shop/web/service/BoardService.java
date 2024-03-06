@@ -54,7 +54,6 @@ public class BoardService {
                 .map(BoardDto::new)
                 .collect(Collectors.toList());
     }
-
     public BoardDto findOne(Long id) {
         Board board = boardRepository.findBoardDistinctById(id);
         return new BoardDto(board);
