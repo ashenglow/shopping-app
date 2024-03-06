@@ -64,3 +64,7 @@ task copyPrivate(type: Copy){
     }
 }
 
+//plain.jar 생성 X
+jar{
+    enabled = false
+}
