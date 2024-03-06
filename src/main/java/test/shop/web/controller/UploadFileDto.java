@@ -9,7 +9,6 @@ public class UploadFileDto {
     private String originalFilename;
     private String storeFileName;
 
-
     public UploadFileDto(UploadFile uploadFile) {
         originalFilename = uploadFile.getOriginalFilename();
         storeFileName = uploadFile.getStoreFileName();
