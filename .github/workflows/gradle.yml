@@ -61,6 +61,9 @@ jobs:
         aws-region: ${{ secrets.AWS_REGION }}
 
     - name: Make dir
+      run: mkdir files
+
+    - name: Make dir
       run: mkdir cicd
 
     - name: Copy jar
