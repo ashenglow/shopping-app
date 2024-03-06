@@ -11,7 +11,6 @@ import java.util.List;
 @Setter
 public class BoardForm {
 
-
     private Long id;
     private String title;
     private String content;
