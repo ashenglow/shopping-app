@@ -1,14 +1,14 @@
 package test.shop.domain;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Getter
+@RequiredArgsConstructor
 public class Member {
 
     @Id
@@ -23,4 +23,10 @@ public class Member {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders = new ArrayList<>();
+
+    @Builder
+    public Member(String name, Address address) {
+        this.name = name;
+        this.address = address;
+    }
 }
