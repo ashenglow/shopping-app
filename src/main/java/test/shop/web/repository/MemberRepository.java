@@ -10,4 +10,6 @@ import java.util.List;
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
     public List<Member> findMemberByName(String name);
+
+    public Member findMemberById(Long memberId);
 }

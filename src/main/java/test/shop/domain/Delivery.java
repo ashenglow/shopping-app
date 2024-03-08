@@ -18,7 +18,18 @@ public class Delivery {
     @Enumerated(EnumType.STRING)
     private DeliveryStatus status; // [READY 준비, COMP 배송]
 
-    public void addOrder(Order order) {
+    @Embedded
+    private Address address;
+
+    public void saveOrder(Order order) {
         this.order = order;
+    }
+
+    public void saveStatus(DeliveryStatus status) {
+        this.status = status;
+    }
+
+    public void saveAddress(Address address) {
+        this.address = address;
     }
 }
