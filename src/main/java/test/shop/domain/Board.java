@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import test.shop.upload.file.UploadFile;
-import test.shop.web.BoardForm;
 
 import java.util.ArrayList;
 import java.util.List;

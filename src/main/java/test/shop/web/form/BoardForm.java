@@ -1,4 +1,4 @@
-package test.shop.web;
+package test.shop.web.form;
 
 import lombok.Getter;
 import lombok.Setter;
