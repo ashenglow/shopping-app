@@ -53,10 +53,10 @@ public class ItemController {
      * 상품 수정 폼
      */
 
-    @GetMapping("/items/{itemid}/edit")
-    public String updateItemForm(Model model, @PathVariable("itemId") Long itemid) {
+    @GetMapping("/items/{itemId}/edit")
+    public String updateItemForm(Model model, @PathVariable("itemId") Long itemId) {
 
-        BookForm form = itemService.findOne(itemid);
+        BookForm form = itemService.findOne(itemId);
         model.addAttribute("form", form);
         return "items/updateItemForm";
     }
@@ -64,7 +64,7 @@ public class ItemController {
     /**
      * 상품 수정
      */
-    @PostMapping("/items/{itemid}/edit")
+    @PostMapping("/items/{itemId}/edit")
     public String updateItem(@ModelAttribute("form") BookForm form, BindingResult bindingResult) {
         itemService.updateItem(form);
         return "redirect:/items";
