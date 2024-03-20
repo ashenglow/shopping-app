@@ -36,7 +36,7 @@ public class Order extends BaseEntity{
     // ==연관관계 메서드== //
     public void saveMember(Member member) {
         this.member = member;
-        member.getOrders().add(this);
+        member.addOrder(this);
     }
 
     public void addOrderItem(OrderItem orderItem) {

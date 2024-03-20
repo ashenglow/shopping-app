@@ -31,10 +31,10 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
     //querydsl
-    implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
-	annotationProcessor 'com.querydsl:querydsl-apt:5.0.0:jakarta'
-	annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
-	annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
+     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+     annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
+     annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
+     annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
 
     //테스트에서 lombok 사용
     testCompileOnly 'org.projectlombok:lombok'
@@ -48,13 +48,10 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
-
-//querydsl build option
-def querydslDir = '$buildDir/generated/querydsl'
-
-clean.doLast {
-	file(querydslDir).deleteDir()
+clean {
+   delete file('src/main/generated')
 }
+
 
 task copyPrivate(type: Copy){
     copy {

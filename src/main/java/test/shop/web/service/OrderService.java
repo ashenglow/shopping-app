@@ -5,9 +5,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import test.shop.domain.*;
 import test.shop.domain.item.Item;
+import test.shop.domain.OrderSearchCond;
+import test.shop.web.form.OrderForm;
 import test.shop.web.repository.ItemRepository;
 import test.shop.web.repository.MemberRepository;
 import test.shop.web.repository.OrderRepository;
+
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -51,5 +55,12 @@ public class OrderService {
         Order order = orderRepository.findOrderById(orderId);
         //주문 취소
         order.cancel();
+    }
+
+    /**
+     * 주문 검색
+     */
+    public List<OrderForm> findOrders(OrderSearchCond orderSearchCond) {
+        return orderRepository.search(orderSearchCond);
     }
 }

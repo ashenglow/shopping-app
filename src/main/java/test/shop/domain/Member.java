@@ -29,4 +29,8 @@ public class Member {
         this.name = name;
         this.address = address;
     }
+
+    public void addOrder(Order order) {
+        orders.add(order);
+    }
 }
