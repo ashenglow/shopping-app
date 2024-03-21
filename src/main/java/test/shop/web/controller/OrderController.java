@@ -1,6 +1,7 @@
 package test.shop.web.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +20,7 @@ import test.shop.web.service.OrderService;
 import java.util.List;
 
 @Controller
+@Slf4j
 @RequiredArgsConstructor
 public class OrderController {
 
@@ -44,8 +46,10 @@ public class OrderController {
     }
 
     @GetMapping("/orders")
-    public String orderList(@ModelAttribute("orderSearch") OrderSearchCond orderSearchCond, Model model) {
-        List<OrderForm> orders = orderService.findOrders(orderSearchCond);
+    public String orderList(@ModelAttribute("orderSearch") OrderSearchCond orderSearchCond, @RequestParam(value = "offset", defaultValue = "0") int offset, @RequestParam(value = "limit", defaultValue = "100") int limit,  Model model) {
+        log.info("orderSearch", orderSearchCond);
+        List<OrderForm> orders = orderService.findOrders(orderSearchCond, offset, limit);
+
         model.addAttribute("orders", orders);
         return "order/orderList";
     }

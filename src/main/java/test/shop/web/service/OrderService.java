@@ -9,6 +9,7 @@ import test.shop.domain.OrderSearchCond;
 import test.shop.web.form.OrderForm;
 import test.shop.web.repository.ItemRepository;
 import test.shop.web.repository.MemberRepository;
+import test.shop.web.repository.OrderQueryRepository;
 import test.shop.web.repository.OrderRepository;
 
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.List;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final OrderQueryRepository orderQueryRepository;
     private final MemberRepository memberRepository;
     private final ItemRepository itemRepository;
 
@@ -60,7 +62,8 @@ public class OrderService {
     /**
      * 주문 검색
      */
-    public List<OrderForm> findOrders(OrderSearchCond orderSearchCond) {
-        return orderRepository.search(orderSearchCond);
+    public List<OrderForm> findOrders(OrderSearchCond orderSearchCond, int offset, int limit) {
+        List<Order> result = orderQueryRepository.search(orderSearchCond, offset, limit);
+        return OrderForm.createOrderForm(result);
     }
 }

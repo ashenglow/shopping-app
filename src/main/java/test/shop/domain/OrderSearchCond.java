@@ -7,4 +7,4 @@ public class OrderSearchCond {
     private String memberName;
     private OrderStatus orderStatus;
 
-}
+    }

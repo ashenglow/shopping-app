@@ -7,8 +7,8 @@ import test.shop.domain.OrderSearchCond;
 
 import java.util.List;
 
-@Repository
-public interface OrderRepository extends JpaRepository<Order, Long>, OrderRepositoryCustom{
+
+public interface OrderRepository extends JpaRepository<Order, Long>{
     public Order findOrderById(Long orderId);
 
 }
