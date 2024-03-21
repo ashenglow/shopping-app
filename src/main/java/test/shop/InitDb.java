@@ -5,6 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import test.shop.domain.*;
 import test.shop.domain.item.Album;
+import test.shop.domain.item.Book;
+import test.shop.web.form.item.BookForm;
+import test.shop.web.service.ItemService;
 import test.shop.web.service.MemberService;
 import test.shop.web.service.OrderService;
 
@@ -25,6 +28,7 @@ public class InitDb {
     static class InitService {
 
         private final MemberService memberService;
+        private final ItemService itemService;
 
         public void dbInit1() {
             memberService.join(Member.builder().name("userA").address(new Address("서울", "1", "1111")).build());
@@ -32,8 +36,8 @@ public class InitDb {
         }
 
         public void dbInit2() {
-            Album.builder().name("The Astronaut").price(16000).stockQuantity(100).artist("Jin").etc("etc").build();
-            Album.builder().name("Moon").price(16000).stockQuantity(100).artist("Jin").etc("etc").build();
+            itemService.saveItem(BookForm.builder().name("JPA1 Book").price(10000).stockQuantity(100).author("kim").isbn("123456").build());
+            itemService.saveItem(BookForm.builder().name("JPA2 Book").price(20000).stockQuantity(100).author("lee").isbn("123356").build());
 
         }
     }

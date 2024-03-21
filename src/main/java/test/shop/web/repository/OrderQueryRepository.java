@@ -36,10 +36,11 @@ public class OrderQueryRepository {
                 .limit(limit)
                 .fetch();
 
+
     }
 
     private BooleanExpression memberNameEq(String memberName) {
-    return !hasLength(memberName) ? null : member.name.eq(memberName);
+    return !hasLength(memberName) ? null : member.name.contains(memberName);
 }
     private BooleanExpression orderStatusEq(OrderStatus orderStatus) {
         return orderStatus == null ? null : order.status.eq(orderStatus);

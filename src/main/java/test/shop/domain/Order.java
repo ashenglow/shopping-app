@@ -3,10 +3,8 @@ package test.shop.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
 
 @Entity
 @Table(name = "orders")
@@ -32,7 +30,12 @@ public class Order extends BaseEntity{
     @Enumerated(EnumType.STRING)
     private OrderStatus status; //[ORDER, CANCEL]
 
-    private LocalDateTime orderDate;
+
+    @Override
+    public String getCreatedDate() {
+        return super.getCreatedDate();
+    }
+
     // ==연관관계 메서드== //
     public void saveMember(Member member) {
         this.member = member;
@@ -53,10 +56,7 @@ public class Order extends BaseEntity{
         this.status = status;
     }
 
-    public void saveOrderDate(LocalDateTime orderDate) {
-        this.orderDate = orderDate;
 
-    }
 
     // ==생성 메서드== //
     public static Order createOrder(Member member, Delivery delivery, OrderItem... orderItems) {
@@ -67,7 +67,6 @@ public class Order extends BaseEntity{
             order.addOrderItem(orderItem);
         }
         order.saveStatus(OrderStatus.ORDER);
-        order.saveOrderDate(LocalDateTime.now());
         return order;
     }
 
