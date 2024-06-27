@@ -9,8 +9,8 @@
          sleep 3
  fi
 
- JAR_PATH="/home/ec2-user/cicd/*.jar"
+ JAR_PATH="/home/ubuntu/cicd/*.jar"
  echo "jar path : $JAR_PATH"
  chmod +x $JAR_PATH
- nohup java -jar -Dspring.profiles.active=prod $JAR_PATH>> /home/ec2-user/cicd/deploy.log 2>> /home/ec2-user/cicd/deploy_err.log &
+ nohup java -jar -Dspring.profiles.active=prod $JAR_PATH>> /home/ubuntu/cicd/deploy.log 2>> /home/ubuntu/cicd/deploy_err.log &
  echo "jar file deploy success"

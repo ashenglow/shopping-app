@@ -81,10 +81,10 @@ jobs:
     - run: ls -al
 
     - name: Upload S3
-      run: aws s3 cp --region ${{ secrets.AWS_REGION }} ./deploy.zip s3://shopbuild/ci-cd/
+      run: aws s3 cp --region ${{ secrets.AWS_REGION }} ./deploy.zip s3://shop-app-backend/ci-cd/
 
     - name: CodeDeploy
-      run: aws deploy create-deployment --application-name shop-app --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name shop --s3-location bucket=shopbuild,bundleType=zip,key=ci-cd/deploy.zip
+      run: aws deploy create-deployment --application-name shop-app --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name shop --s3-location bucket=shop-app-backend,bundleType=zip,key=ci-cd/deploy.zip
 
 
   dependency-submission:
