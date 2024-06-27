@@ -1,7 +1,7 @@
 package test.shop.domain;
 
 public enum OrderStatus {
-       CART,
+    CART,
     WAITING,
     CONFIRMED,
     SHIPPED,
