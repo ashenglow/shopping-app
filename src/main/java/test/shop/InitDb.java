@@ -11,6 +11,9 @@ import test.shop.web.service.ItemService;
 import test.shop.web.service.MemberService;
 import test.shop.web.service.ReviewService;
 
+import java.io.File;
+import java.io.IOException;
+
 @Component
 @RequiredArgsConstructor
 public class InitDb {
@@ -19,9 +22,19 @@ public class InitDb {
 
     @PostConstruct
     public void init() {
-        initService.memberInit();
+        File flag = new File("/path/to/init_flag");
+        if(!flag.exists()) {
+               initService.memberInit();
         initService.itemInit();
         initService.reviewInit();
+            flag.getParentFile().mkdirs();
+            try {
+                flag.createNewFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
     }
 
     @Component
