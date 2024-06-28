@@ -24,6 +24,7 @@ import test.shop.exception.web.CustomAuthEntryPointHandler;
 import test.shop.web.auth.RedisService;
 import test.shop.web.auth.filter.JwtAuthFilter;
 import test.shop.web.auth.TokenUtil;
+import test.shop.web.auth.filter.MalFormedRequestFilter;
 
 
 import java.io.IOException;
@@ -38,7 +39,7 @@ public class SecurityConfig {
     private final RedisService redisService;
     private final CustomAuthEntryPointHandler customAuthEntryPointHandler;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
-
+    private final MalFormedRequestFilter malFormedRequestFilter;
     private static final String[] AUTH_WHITELIST = {
             "/v2/api-docs",
             "/swagger-resources/**",
@@ -103,6 +104,7 @@ public class SecurityConfig {
 
 
         // JwtAuthFilter를 UsernamePasswordAuthenticationFilter 전에 추가
+        http.addFilterBefore(malFormedRequestFilter, JwtAuthFilter.class);
         http.addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(new OncePerRequestFilter() {
         @Override
