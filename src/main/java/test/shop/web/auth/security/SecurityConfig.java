@@ -1,5 +1,9 @@
 package test.shop.web.auth.security;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.OncePerRequestFilter;
 import test.shop.exception.web.CustomAccessDeniedHandler;
 import test.shop.exception.web.CustomAuthEntryPointHandler;
 import test.shop.web.auth.RedisService;
@@ -21,6 +26,7 @@ import test.shop.web.auth.filter.JwtAuthFilter;
 import test.shop.web.auth.TokenUtil;
 
 
+import java.io.IOException;
 import java.util.Arrays;
 
 @Configuration
@@ -98,7 +104,13 @@ public class SecurityConfig {
 
         // JwtAuthFilter를 UsernamePasswordAuthenticationFilter 전에 추가
         http.addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class);
-
+        http.addFilterBefore(new OncePerRequestFilter() {
+        @Override
+        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException, ServletException, IOException {
+            logger.info("Processing request: " + request.getMethod() + " " + request.getRequestURI());
+            filterChain.doFilter(request, response);
+        }
+    }, UsernamePasswordAuthenticationFilter.class);
 
         //ExceptionHandler
         http.exceptionHandling((exception) -> exception
