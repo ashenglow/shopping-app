@@ -18,7 +18,6 @@ public class MalFormedRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String method = request.getMethod();
          if (method.startsWith("MGLNDD_") || !method.matches("^[A-Z]+$")) {
-            logger.warning(String.format("Blocked suspicious request: Method '%s' from IP %s", method, request.getRemoteAddr()));
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid request method");
             return;
         }
