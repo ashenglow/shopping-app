@@ -39,7 +39,6 @@ public class SecurityConfig {
     private final RedisService redisService;
     private final CustomAuthEntryPointHandler customAuthEntryPointHandler;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
-    private final MalFormedRequestFilter malFormedRequestFilter;
     private static final String[] AUTH_WHITELIST = {
             "/v2/api-docs",
             "/swagger-resources/**",
@@ -63,6 +62,11 @@ public class SecurityConfig {
      @Bean
     public PasswordEncoder PasswordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public MalFormedRequestFilter malformedRequestFilter() {
+        return new MalFormedRequestFilter();
     }
 
 //    @Bean
@@ -105,7 +109,7 @@ public class SecurityConfig {
 
         // JwtAuthFilter를 UsernamePasswordAuthenticationFilter 전에 추가
         http.addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(malFormedRequestFilter, JwtAuthFilter.class);
+                .addFilterBefore(malformedRequestFilter(), JwtAuthFilter.class);
 //        http.addFilterBefore(new OncePerRequestFilter() {
 //        @Override
 //        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException, ServletException, IOException {

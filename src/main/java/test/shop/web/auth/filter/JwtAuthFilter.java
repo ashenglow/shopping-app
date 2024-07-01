@@ -24,7 +24,7 @@ import test.shop.web.auth.TokenUtil;
 import java.io.IOException;
 import java.util.Set;
 
-@Order(Ordered.HIGHEST_PRECEDENCE)
+
 @RequiredArgsConstructor
 @Slf4j
 public class JwtAuthFilter extends OncePerRequestFilter {

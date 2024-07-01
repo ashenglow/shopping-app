@@ -11,7 +11,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-@Component
+
 public class MalFormedRequestFilter extends OncePerRequestFilter {
     private static final Logger logger = LoggerFactory.getLogger(MalFormedRequestFilter.class);
     @Override
