@@ -127,8 +127,8 @@ public class SecurityConfig {
         //인가 설정
         http.authorizeHttpRequests((authorize) -> authorize
                 .requestMatchers(AUTH_WHITELIST).permitAll()
-                .requestMatchers("/public/**").permitAll()
-                .requestMatchers("/v1/login", "/v1/register", "/v1/logout", "/v1/refresh").permitAll()
+                .requestMatchers("/api/public/**").permitAll()
+                .requestMatchers("/api/v1/login", "/api/v1/register", "/api/v1/logout", "/api/v1/refresh").permitAll()
                 .requestMatchers(("/api/**")).authenticated()
                 .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
                 .anyRequest().authenticated()

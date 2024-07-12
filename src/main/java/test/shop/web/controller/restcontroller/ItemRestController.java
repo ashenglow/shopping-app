@@ -42,7 +42,7 @@ public class ItemRestController {
     /**
      * 상품 목록
      */
-    @RequestMapping("/public/v1/all-products")
+    @RequestMapping("/api/public/v1/all-products")
     public ResponseEntity<Result<List<ProductDto>>> list() {
         List<ProductDto> productDtos = itemService.findAll();
         //handling error
@@ -55,7 +55,7 @@ public class ItemRestController {
     /**
      * 상품 상세
      */
-    @RequestMapping("/public/v1/product/{itemId}")
+    @RequestMapping("/api/public/v1/product/{itemId}")
     public ResponseEntity<Result<ProductDetailDto>> detail(@PathVariable("itemId") Long itemId) {
         ProductDetailDto dto = itemService.getItemDetail(itemId);
         //handling error
@@ -94,7 +94,7 @@ public class ItemRestController {
     /**
      * 전체 상품 리뷰 조회
      */
-    @GetMapping("/public/v1/reviews")
+    @GetMapping("/api/public/v1/reviews")
     public ResponseEntity<Result<List<ReviewDto>>> listReviews(@RequestParam("id") Long itemId) {
         List<ReviewDto> dtos = reviewService.findReviews(itemId);
         //handling error
@@ -104,7 +104,7 @@ public class ItemRestController {
         return ResponseEntity.ok(new Result<>(dtos));
     }
 
-    @GetMapping("/public/v1/products")
+    @GetMapping("/api/public/v1/products")
     public ResponseEntity<Page<ProductDto>> list(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(name = "category", required = false) String category,

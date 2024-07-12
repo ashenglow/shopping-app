@@ -21,13 +21,13 @@ public class AuthApiController {
     private final TokenUtil tokenUtil;
 
 
-    @PostMapping("/v1/register")
+    @PostMapping("/api/v1/register")
     public ResponseEntity<String> register(@RequestBody ProfileDto request, HttpServletResponse response) throws JsonProcessingException {
         authService.register(request);
         return ResponseEntity.status(200).body("회원이 등록되었습니다.");
     }
 
-    @PostMapping("/v1/login")
+    @PostMapping("/api/v1/login")
     public ResponseEntity<UserModelDto> login(
             @RequestBody MemberLoginDto request, HttpServletResponse response
     ) throws JsonProcessingException {
@@ -38,7 +38,7 @@ public class AuthApiController {
         return ResponseEntity.status(200).body(dto);
     }
 
-    @RequestMapping("/v1/refresh")
+    @RequestMapping("/api/v1/refresh")
     public ResponseEntity<UserModelDto> refresh(HttpServletRequest request, HttpServletResponse response) throws JsonProcessingException {
         String refreshToken = authService.extractRefreshTokenFromCookie(request);
         String username = authService.decodeUsernameFromRefreshToken(refreshToken);
@@ -56,7 +56,7 @@ public class AuthApiController {
         return ResponseEntity.status(200).body(dto);
     }
 
-    @PostMapping("/v1/logout")
+    @PostMapping("/api/v1/logout")
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) throws JsonProcessingException {
 
         String refreshToken = authService.extractRefreshTokenFromCookie(request);
