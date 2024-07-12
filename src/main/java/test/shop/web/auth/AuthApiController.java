@@ -49,7 +49,7 @@ public class AuthApiController {
     }
 
 
-    @RequestMapping("/api/v1/me")
+    @RequestMapping("/api/auth/v1/me")
     public ResponseEntity<UserModelDto> getMemberProfile(HttpServletRequest request, HttpServletResponse response) throws JsonProcessingException {
         String accessToken = tokenUtil.extractAccessToken(request);
         UserModelDto dto = authService.getMemberProfile(accessToken);

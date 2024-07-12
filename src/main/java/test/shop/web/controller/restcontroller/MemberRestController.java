@@ -21,7 +21,7 @@ private final TokenUtil tokenUtil;
     private final MemberService memberService;
     private final AuthService authService;
 
-    @GetMapping("/api/v1/member/update")
+    @GetMapping("/api/auth/v1/member/update")
     public ResponseEntity<ProfileDto> getUpdateMemberProfile(@RequestBody Long id, HttpServletResponse response) {
 
         ProfileDto profile = memberService.getUpdateMemberProfile(id);
@@ -29,14 +29,14 @@ private final TokenUtil tokenUtil;
     }
 
 
-    @PostMapping("/api/v1/member/update")
+    @PostMapping("/api/auth/v1/member/update")
     public ResponseEntity<Boolean> updateMemberProfile(@RequestBody ProfileDto form, HttpServletResponse response) {
         log.info("form : " + form.getId());
         memberService.update(form);
         return ResponseEntity.ok(true);
     }
 
-    @RequestMapping("/api/v1/member/{memberId}/delete")
+    @RequestMapping("/api/auth/v1/member/{memberId}/delete")
     public ResponseEntity<String> deleteMember(@PathVariable("memberId") Long memberId) {
         memberService.delete(memberId);
         return ResponseEntity.ok("회원이 삭제되었습니다.");

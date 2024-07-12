@@ -129,7 +129,7 @@ public class SecurityConfig {
                 .requestMatchers(AUTH_WHITELIST).permitAll()
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/api/v1/login", "/api/v1/register", "/api/v1/logout", "/api/v1/refresh").permitAll()
-                .requestMatchers(("/api/**")).authenticated()
+                .requestMatchers(("/api/auth/**")).authenticated()
                 .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
                 .anyRequest().authenticated()
 

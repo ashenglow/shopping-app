@@ -23,13 +23,13 @@ public class OrderRestController {
     private final OrderService orderService;
     private final AuthService authService;
 
-    @RequestMapping("/api/v1/order/new/{memberId}")
+    @RequestMapping("/api/auth/v1/order/new/{memberId}")
     public ResponseEntity<Long> order(@PathVariable("memberId") Long memberId, @RequestBody List<OrderRequestDto> dtos) {
         Long orderId = orderService.order(memberId, dtos);
         return ResponseEntity.ok(orderId);
     }
 
-    @RequestMapping("/api/v1/order/{orderId}")
+    @RequestMapping("/api/auth/v1/order/{orderId}")
     public ResponseEntity<OrderDto> getOrderDetails(@PathVariable("orderId") Long orderId) {
         OrderDto order = orderService.findOrderById(orderId);
         return ResponseEntity.ok(order);
@@ -41,14 +41,14 @@ public class OrderRestController {
 //
 //    }
 
-    @RequestMapping("/api/v1/orders/me")
+    @RequestMapping("/api/auth/v1/orders/me")
     public Page<OrderDto> myOrders(HttpServletRequest request, @RequestParam(value = "offset", defaultValue = "0") int offset, @RequestParam(value = "limit", defaultValue = "100") int limit) throws JsonProcessingException {
         Long memberId = getMemberId(request);
         return orderService.findOrdersByMemberId(memberId, offset, limit);
 
     }
 
-    @RequestMapping("/api/v1/order/{orderId}/cancel")
+    @RequestMapping("/api/auth/v1/order/{orderId}/cancel")
     public void cancelOrder(@PathVariable("orderId") Long orderId) {
         orderService.cancelOrder(orderId);
     }

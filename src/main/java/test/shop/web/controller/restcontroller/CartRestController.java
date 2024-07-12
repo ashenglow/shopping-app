@@ -21,27 +21,27 @@ public class CartRestController {
     private final CartService cartService;
     private final AuthService authService;
 
-   @RequestMapping("/api/v1/mycart/{memberId}")
+   @RequestMapping("/api/auth/v1/mycart/{memberId}")
     public ResponseEntity<List<ItemDto>> loadCart(@PathVariable("memberId") Long memberId) {
        List<ItemDto> cartItems = cartService.getCartItems(memberId);
        return ResponseEntity.ok(cartItems);
    }
 
-    @PostMapping("/api/v1/cart/{itemId}")
+    @PostMapping("/api/auth/v1/cart/{itemId}")
     public ResponseEntity<String> addToCart(HttpServletRequest request, @PathVariable("itemId") Long itemId, @RequestBody int count) throws JsonProcessingException {
         Long memberId = getMemberId(request);
         cartService.addItemToCart(itemId, memberId, count);
         return ResponseEntity.ok("Add item success");
     }
 
-    @DeleteMapping("/api/v1/cart/{itemId}")
+    @DeleteMapping("/api/auth/v1/cart/{itemId}")
     public ResponseEntity<Long> deleteCartItem(HttpServletRequest request, @PathVariable("itemId") Long itemId) throws JsonProcessingException {
         Long memberId = getMemberId(request);
         Long removedItemId = cartService.deleteCartItem(itemId, memberId);
         return ResponseEntity.ok(removedItemId);
     }
 
-    @PutMapping("/api/v1/cart/update/{itemId}")
+    @PutMapping("/api/auth/v1/cart/update/{itemId}")
     public ResponseEntity<Long> updateCartItem(HttpServletRequest request, @PathVariable("itemId") Long itemId, @RequestBody int count) throws JsonProcessingException {
         Long memberId = getMemberId(request);
         Long updatedItemId = cartService.updateCartItem(itemId, memberId, count);

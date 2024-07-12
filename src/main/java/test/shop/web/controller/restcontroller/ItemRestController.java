@@ -68,7 +68,7 @@ public class ItemRestController {
     /**
      * 상품 리뷰 작성
      */
-    @RequestMapping("/api/v1/product/{itemId}/review")
+    @RequestMapping("/api/auth/v1/product/{itemId}/review")
     public ResponseEntity<Boolean> createReview(HttpServletRequest request, @RequestBody ReviewDto form, @PathVariable("itemId") Long itemId) throws JsonProcessingException {
         Long memberId = getMemberId(request);
         form.setUserId(memberId);
@@ -81,7 +81,7 @@ public class ItemRestController {
     /**
      * 상품 리뷰 삭제
      */
-    @DeleteMapping("/api/v1/review/delete")
+    @DeleteMapping("/api/auth/v1/review/delete")
     public ResponseEntity<Boolean> deleteReview(@RequestParam("id") Long reviewId) {
         reviewService.deleteReview(reviewId);
         //handling error
