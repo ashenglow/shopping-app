@@ -143,7 +143,9 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedOrigin("https://soolstore.r-e.kr");
+        configuration.addAllowedOrigin("http://soolstore.r-e.kr");
         configuration.addAllowedOrigin("https://www.soolstore.r-e.kr");
+        configuration.addAllowedOrigin("http://www.soolstore.r-e.kr");
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE", "PUT", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
