@@ -33,19 +33,29 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final CustomAuthEntryPointHandler customAuthEntryPointHandler;
 
     private static final Set<String> WHITELIST = Set.of(
-            "/v1/login", "/v1/register", "/v1/logout", "/v1/refresh", "/public"
+             "/api/v1/login",
+    "/api/v1/register",
+    "/api/v1/logout",
+    "/api/v1/refresh"
 
     );
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String requestURI = request.getRequestURI();
-        if (requestURI.contains("/public") || WHITELIST.contains(requestURI)) {
-            log.info("Skipping JwtAuthFilter for {}", requestURI);
-            filterChain.doFilter(request, response);
-            return;
-        }
+        // Check for exact matches in the whitelist
+    if (WHITELIST.contains(requestURI)) {
+        log.info("Skipping JwtAuthFilter for whitelisted URI: {}", requestURI);
+        filterChain.doFilter(request, response);
+        return;
+    }
 
+    // Check for paths starting with /api/public
+    if (requestURI.startsWith("/api/public")) {
+        log.info("Skipping JwtAuthFilter for public API: {}", requestURI);
+        filterChain.doFilter(request, response);
+        return;
+    }
         try {
   //request header 에서 token 추출
             String accessToken = tokenUtil.extractAccessToken(request);
