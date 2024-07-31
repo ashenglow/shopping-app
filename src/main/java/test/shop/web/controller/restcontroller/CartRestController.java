@@ -2,6 +2,8 @@ package test.shop.web.controller.restcontroller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Data;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -52,6 +54,7 @@ public class CartRestController {
         return authService.getMemberIdFromAccessToken(request);
     }
 
+    @Getter
     public class UpdateCartItemRequest {
     private int count;
 
