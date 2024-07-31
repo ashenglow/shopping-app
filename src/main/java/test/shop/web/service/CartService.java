@@ -1,10 +1,12 @@
 package test.shop.web.service;
 
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import test.shop.domain.Cart;
 import test.shop.domain.CartItem;
 import test.shop.domain.Member;
@@ -25,6 +27,7 @@ public class CartService {
     private final CartRepository cartRepository;
     private final MemberRepository memberRepository;
     private final ItemRepository itemRepository;
+    private EntityManager em;
 
     public List<ItemDto> getCartItems(Long memberId) {
         Cart cart = getCartByMemberId(memberId);
@@ -55,9 +58,12 @@ public class CartService {
         cartRepository.save(cart);
     }
 
+    @Transactional
     public Long updateCartItem(Long itemId, Long memberId, int count) {
         Cart cart = getCartByMemberId(memberId);
-        ItemDto updatedItemDto = findCartItem(cart, itemId).update(count);
+        CartItem cartItem = findCartItem(cart, itemId);
+        cartItem = em.merge(cartItem);
+        ItemDto updatedItemDto = cartItem.update(count);
         return updatedItemDto.getId();
     }
 
