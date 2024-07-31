@@ -27,7 +27,7 @@ public class CartService {
     private final CartRepository cartRepository;
     private final MemberRepository memberRepository;
     private final ItemRepository itemRepository;
-    private EntityManager em;
+
 
     public List<ItemDto> getCartItems(Long memberId) {
         Cart cart = getCartByMemberId(memberId);
@@ -62,8 +62,8 @@ public class CartService {
     public Long updateCartItem(Long itemId, Long memberId, int count) {
         Cart cart = getCartByMemberId(memberId);
         CartItem cartItem = findCartItem(cart, itemId);
-        cartItem = em.merge(cartItem);
         ItemDto updatedItemDto = cartItem.update(count);
+        cartRepository.save(cart);
         return updatedItemDto.getId();
     }
 
