@@ -42,9 +42,9 @@ public class CartRestController {
     }
 
     @PutMapping("/api/auth/v1/cart/update/{itemId}")
-    public ResponseEntity<Long> updateCartItem(HttpServletRequest request, @PathVariable("itemId") Long itemId, @RequestBody int count) throws JsonProcessingException {
+    public ResponseEntity<Long> updateCartItem(HttpServletRequest request, @PathVariable("itemId") Long itemId, @RequestBody UpdateCartItemRequest updateRequest) throws JsonProcessingException {
         Long memberId = getMemberId(request);
-        Long updatedItemId = cartService.updateCartItem(itemId, memberId, count);
+        Long updatedItemId = cartService.updateCartItem(itemId, memberId, updateRequest.getCount());
         return ResponseEntity.ok(updatedItemId);
     }
 
@@ -52,5 +52,16 @@ public class CartRestController {
         return authService.getMemberIdFromAccessToken(request);
     }
 
+    public class UpdateCartItemRequest {
+    private int count;
 
+    // getter and setter for count
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
+}
 }
