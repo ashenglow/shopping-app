@@ -14,6 +14,7 @@ import test.shop.web.auth.AuthService;
 import test.shop.web.dto.ItemDto;
 import test.shop.web.dto.request.CartRequestDto;
 import test.shop.web.dto.request.UpdateCartItemRequest;
+import test.shop.web.dto.response.UpdateCartItemResponse;
 import test.shop.web.service.CartService;
 
 import java.util.List;
@@ -46,10 +47,13 @@ public class CartRestController {
     }
 
     @PutMapping("/api/auth/v1/cart/update/{itemId}")
-    public ResponseEntity<Long> updateCartItem(HttpServletRequest request, @PathVariable("itemId") Long itemId, @RequestBody UpdateCartItemRequest updateRequest) throws JsonProcessingException {
+    public ResponseEntity<UpdateCartItemResponse> updateCartItem(HttpServletRequest request, @PathVariable("itemId") Long itemId, @RequestBody UpdateCartItemRequest updateRequest) throws JsonProcessingException {
         Long memberId = getMemberId(request);
         Long updatedItemId = cartService.updateCartItem(itemId, memberId, updateRequest.getCount());
-        return ResponseEntity.ok(updatedItemId);
+        UpdateCartItemResponse response = new UpdateCartItemResponse();
+        response.setId(updatedItemId);
+        response.setCount(updateRequest.getCount());
+        return ResponseEntity.ok(response);
     }
 
     private Long getMemberId(HttpServletRequest request) throws JsonProcessingException {
