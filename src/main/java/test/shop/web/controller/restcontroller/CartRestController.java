@@ -13,6 +13,7 @@ import test.shop.domain.Cart;
 import test.shop.web.auth.AuthService;
 import test.shop.web.dto.ItemDto;
 import test.shop.web.dto.request.CartRequestDto;
+import test.shop.web.dto.request.UpdateCartItemRequest;
 import test.shop.web.service.CartService;
 
 import java.util.List;
@@ -55,9 +56,4 @@ public class CartRestController {
         return authService.getMemberIdFromAccessToken(request);
     }
 
-    @Data
-    @NoArgsConstructor
-    public class UpdateCartItemRequest {
-    private int count;
-}
 }
