@@ -18,6 +18,7 @@ import test.shop.web.repository.ItemRepository;
 import test.shop.web.repository.MemberRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,14 +49,25 @@ public class CartService {
         cart.saveMember(member);
         return cartRepository.save(cart);
     }
-
+    @Transactional
     public void addItemToCart (Long itemId, Long memberId, int count) {
         Cart cart = getCartByMemberId(memberId);
         Item item = itemRepository.findItemById(itemId)
                 .orElseThrow(() -> new EntityNotFoundException("Item not found"));
+
+        Optional<CartItem> existingCartItem = cart.getCartItems().stream()
+                .filter(cartItem -> cartItem.getItem().getId().equals(itemId))
+                .findFirst();
+        if (existingCartItem.isPresent()) {
+            CartItem cartItem = existingCartItem.get();
+            cartItem.changeCount(cartItem.getCount() + count);
+        }else {
         CartItem cartItem = CartItem.addItemToCart(item, count);
         cart.addCartItem(cartItem);
+        }
+
         cartRepository.save(cart);
+        log.info("[CartService] Added item to cart: itemId={}, memberId={}, count={}", itemId, memberId, count);
     }
 
     @Transactional
@@ -64,6 +76,7 @@ public class CartService {
         CartItem cartItem = findCartItem(cart, itemId);
         ItemDto updatedItemDto = cartItem.update(count);
         cartRepository.save(cart);
+        log.info("[CartService] Updated cart item: itemId={}, memberId={}, newCount={}", itemId, memberId, count);
         return updatedItemDto.getId();
     }
 
@@ -74,9 +87,13 @@ public class CartService {
                 .orElseThrow(() -> new EntityNotFoundException("CartItem not found"));
     }
 
+    @Transactional
     public Long deleteCartItem(Long itemId, Long memberId) {
         Cart cart = getCartByMemberId(memberId);
-        findCartItem(cart, itemId).delete();
+        CartItem cartItem = findCartItem(cart, itemId);
+        cartItem.delete();
+        cartRepository.save(cart);
+        log.info("[CartService] Deleted cart item: itemId={}, memberId={}", itemId, memberId);
         return itemId;
     }
 
