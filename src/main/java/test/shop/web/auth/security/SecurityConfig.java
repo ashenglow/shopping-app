@@ -146,6 +146,8 @@ public class SecurityConfig {
         configuration.addAllowedOrigin("http://soolstore.r-e.kr");
         configuration.addAllowedOrigin("https://www.soolstore.r-e.kr");
         configuration.addAllowedOrigin("http://www.soolstore.r-e.kr");
+        configuration.addAllowedOrigin("http://localhost:3000");
+        configuration.addAllowedOrigin("http://localhost:8080");
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE", "PUT", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
