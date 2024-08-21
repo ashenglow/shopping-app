@@ -95,11 +95,11 @@ public class PaymentServiceBackup {
                 entity,
                 ApproveResponse.class);
         ApproveResponse approveResponse = response.getBody();
-        if(approveResponse != null) {
-            Long orderId = orderService.order(request.getUserId(), request.getOrderItems());
-            approveResponse.setOrderId(orderId);
-
-        }
+//        if(approveResponse != null) {
+//            Long orderId = orderService.order(request.getUserId(), request.getOrderItems());
+//            approveResponse.setOrderId(orderId);
+//
+//        }
         return approveResponse;
     }
 }

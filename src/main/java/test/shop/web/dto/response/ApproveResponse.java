@@ -22,7 +22,7 @@ public class ApproveResponse {
     private String createdAt;
     private String approvedAt;
 
-    private Long orderId;
+//    private Long orderId;
 
     @Data
     public static class Amount{

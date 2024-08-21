@@ -11,5 +11,5 @@ public class PaymentApproveRequest {
     private String transactionId;
     private Long userId;
     private String pgToken;
-    private List<OrderRequestDto> orderItems;
+
 }
