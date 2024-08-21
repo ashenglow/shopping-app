@@ -36,7 +36,7 @@ public class PaymentService {
     @Value("${kakaopay.api.secret.key}")
     private String kakaopaySecretKey;
 
-    @Value("${kakaopay.cid")
+    @Value("${kakaopay.cid}")
     private String cid;
 
     @Value("${app.frontend.url}")
@@ -91,7 +91,7 @@ public class PaymentService {
         return readyResponse;
     }
 
-    public ApproveResponse approve(String pgToken, PaymentApproveRequest request) {
+    public ApproveResponse approve(String pgToken, String partnerOrderId, PaymentApproveRequest request) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "SECRET_KEY " + kakaopaySecretKey);
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -107,8 +107,8 @@ public class PaymentService {
 
         ApproveRequest approveRequest = ApproveRequest.builder()
                 .cid(cid)
-                .tid(this.tid)
-                .partnerOrderId(request.getTransactionId())
+                .tid(getTidByPartnerOrderId(partnerOrderId))
+                .partnerOrderId(partnerOrderId)
                 .partnerUserId(request.getUserId().toString())
                 .pgToken(pgToken)
                 .build();
@@ -119,14 +119,18 @@ public class PaymentService {
                 entityMap,
                 ApproveResponse.class);
         ApproveResponse approveResponse = response.getBody();
-        if(approveResponse != null) {
-            Long orderId = orderService.order(request.getUserId(), request.getOrderItems());
-            approveResponse.setOrderId(orderId);
-
-        }
+//        if(approveResponse != null) {
+//            Long orderId = orderService.order(request.getUserId(), request.getOrderItems());
+//            approveResponse.setOrderId(orderId);
+//
+//        }
         return approveResponse;
 
 
+    }
+
+    private String getTidByPartnerOrderId(String partnerOrderId) {
+        return this.tid;
     }
 
 

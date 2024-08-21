@@ -24,10 +24,17 @@ public class OrderRestController {
     private final AuthService authService;
 
     @RequestMapping("/api/auth/v1/order/new/{memberId}")
-    public ResponseEntity<Long> order(@PathVariable("memberId") Long memberId, @RequestBody List<OrderRequestDto> dtos) {
-        Long orderId = orderService.order(memberId, dtos);
+    public ResponseEntity<Long> order(@PathVariable("memberId") String memberId, @RequestBody List<OrderRequestDto> dtos) {
+        Long parsedId = Long.parseLong(memberId);
+        Long orderId = orderService.order(parsedId, dtos);
         return ResponseEntity.ok(orderId);
     }
+//    @RequestMapping("/api/auth/v1/order/new/{memberId}")
+//    public ResponseEntity<Long> order(@PathVariable("memberId") Long memberId, @RequestBody List<OrderRequestDto> dtos) {
+//
+//        Long orderId = orderService.order(memberId, dtos);
+//        return ResponseEntity.ok(orderId);
+//    }
 
     @RequestMapping("/api/auth/v1/order/{orderId}")
     public ResponseEntity<OrderDto> getOrderDetails(@PathVariable("orderId") Long orderId) {

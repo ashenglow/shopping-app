@@ -30,12 +30,12 @@ public class PaymentRestController {
 
     @PostMapping("/api/auth/v1/payment/approve")
     public ResponseEntity<ApproveResponse> approve(@RequestParam("partner_order_id") String partnerOrderId, @RequestParam("pg_token") String pgToken, @RequestBody PaymentApproveRequest request) {
-        ApproveResponse response = paymentService.approve(pgToken, request);
+        ApproveResponse response = paymentService.approve(pgToken, partnerOrderId, request);
         return ResponseEntity.ok(response);
     }
     @PostMapping("/api/public/v1/payment/approve-test")
     public ResponseEntity<ApproveResponse> approve_test(@RequestParam("partner_order_id") String partnerOrderId, @RequestParam("pg_token") String pgToken, @RequestBody PaymentApproveRequest request) {
-        ApproveResponse response = paymentService.approve(pgToken, request);
+        ApproveResponse response = paymentService.approve(pgToken, partnerOrderId, request);
         return ResponseEntity.ok(response);
     }
 
