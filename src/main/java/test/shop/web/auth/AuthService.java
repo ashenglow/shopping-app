@@ -127,9 +127,8 @@ public class AuthService {
             throw new CustomTokenException("Access token not found: " + e.getMessage());
         }
         return null;
-
-
     }
+
 
     public boolean logout(String accessToken, String refreshToken) {
 
