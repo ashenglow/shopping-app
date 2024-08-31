@@ -67,7 +67,6 @@ public class PaymentService {
                 .partnerOrderId(request.getTransactionId())
                 .partnerUserId(request.getUserId().toString())
                 .itemName(request.getItemName())
-                .itemCode(request.getItemId().toString())
                 .quantity(request.getQuantity())
                 .totalAmount(request.getTotalAmount())
                 .taxFreeAmount(0)
