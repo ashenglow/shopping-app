@@ -1,6 +1,8 @@
 package test.shop.web.auth;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,6 +17,7 @@ import test.shop.web.dto.UserModelDto;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Auth", description = "Auth 관련 API 입니다")
 public class AuthApiController {
 
     private final AuthService authService;
@@ -22,12 +25,14 @@ public class AuthApiController {
 
 
     @PostMapping("/api/v1/register")
+    @Operation(summary = "회원 등록", description = "회원를 등록합니다.")
     public ResponseEntity<String> register(@RequestBody ProfileDto request, HttpServletResponse response) throws JsonProcessingException {
         authService.register(request);
         return ResponseEntity.status(200).body("회원이 등록되었습니다.");
     }
 
     @PostMapping("/api/v1/login")
+    @Operation(summary = "로그인", description = "로그인을 수행합니다.")
     public ResponseEntity<UserModelDto> login(
             @RequestBody MemberLoginDto request, HttpServletResponse response
     ) throws JsonProcessingException {
@@ -39,6 +44,7 @@ public class AuthApiController {
     }
 
     @RequestMapping("/api/v1/refresh")
+    @Operation(summary = "리프레시", description = "토큰을 리프레시합니다.")
     public ResponseEntity<UserModelDto> refresh(HttpServletRequest request, HttpServletResponse response) throws JsonProcessingException {
         String refreshToken = authService.extractRefreshTokenFromCookie(request);
         String username = authService.decodeUsernameFromRefreshToken(refreshToken);
@@ -50,6 +56,7 @@ public class AuthApiController {
 
 
     @RequestMapping("/api/auth/v1/me")
+    @Operation(summary = "회원 정보 가져오기", description = "프로필의 회원 정보를 가져옵니다.")
     public ResponseEntity<UserModelDto> getMemberProfile(HttpServletRequest request, HttpServletResponse response) throws JsonProcessingException {
         String accessToken = tokenUtil.extractAccessToken(request);
         UserModelDto dto = authService.getMemberProfile(accessToken);
@@ -57,6 +64,7 @@ public class AuthApiController {
     }
 
     @PostMapping("/api/v1/logout")
+    @Operation(summary = "로그아웃", description = "로그아웃을 수행합니다.")
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) throws JsonProcessingException {
 
         String refreshToken = authService.extractRefreshTokenFromCookie(request);
