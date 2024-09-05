@@ -1,5 +1,6 @@
 package test.shop.web.controller.restcontroller;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class PaymentRestController {
         return ResponseEntity.ok(response);
     }
 
+    @Hidden
     @PostMapping("/api/public/v1/payment/ready-test")
     public ResponseEntity<ReadyResponse> ready_test(@RequestParam("partner_order_id") String partnerOrderId,  @RequestBody PaymentReadyRequest request) {
         ReadyResponse response = paymentService.ready(request);
@@ -38,6 +40,7 @@ public class PaymentRestController {
         ApproveResponse response = paymentService.approve(pgToken, partnerOrderId, request);
         return ResponseEntity.ok(response);
     }
+    @Hidden
     @PostMapping("/api/public/v1/payment/approve-test")
     public ResponseEntity<ApproveResponse> approve_test(@RequestParam("partner_order_id") String partnerOrderId, @RequestParam("pg_token") String pgToken, @RequestBody PaymentApproveRequest request) {
         ApproveResponse response = paymentService.approve(pgToken, partnerOrderId, request);

@@ -24,8 +24,8 @@ public class CartRestController {
     private final CartService cartService;
     private final AuthService authService;
 
-   @RequestMapping("/api/auth/v1/mycart/{memberId}")
-   @Operation(summary = "장바구니", description = "장바구니를 가져옵니다.")
+   @GetMapping("/api/auth/v1/mycart/{memberId}")
+   @Operation(summary = "장바구니 조회", description = "장바구니를 가져옵니다.")
     public ResponseEntity<List<ItemDto>> loadCart(@PathVariable("memberId") Long memberId) {
        List<ItemDto> cartItems = cartService.getCartItems(memberId);
        return ResponseEntity.ok(cartItems);
