@@ -25,34 +25,35 @@ public class OrderRestController {
     private final OrderService orderService;
     private final AuthService authService;
 
-    @RequestMapping("/api/auth/v1/order/new/{memberId}")
-    @Operation(summary = "주문", description = "주문을 생성합니다.")
+    @PostMapping("/api/auth/v1/order/new/{memberId}")
+    @Operation(summary = "주문 생성", description = "주문을 생성합니다.")
     public ResponseEntity<Long> order(@PathVariable("memberId") String memberId, @RequestBody List<OrderRequestDto> dtos) {
         Long parsedId = Long.parseLong(memberId);
         Long orderId = orderService.order(parsedId, dtos);
         return ResponseEntity.ok(orderId);
     }
 
-    @RequestMapping("/api/auth/v1/order/{orderId}")
-    @Operation(summary = "주문 상세", description = "주문 상세를 가져옵니다.")
+    @GetMapping("/api/auth/v1/order/{orderId}")
+    @Operation(summary = "주문 상세 조회", description = "주문 상세를 가져옵니다.")
     public ResponseEntity<OrderDto> getOrderDetails(@PathVariable("orderId") Long orderId) {
         OrderDto order = orderService.findOrderById(orderId);
         return ResponseEntity.ok(order);
     }
 
 
-    @RequestMapping("/api/auth/v1/orders/me")
-    @Operation(summary = "주문 목록", description = "회원 주문 목록을 가져옵니다.")
+    @GetMapping("/api/auth/v1/orders/me")
+    @Operation(summary = "주문 목록 조회", description = "회원 주문 목록을 가져옵니다.")
     public Page<OrderDto> myOrders(HttpServletRequest request, @RequestParam(value = "offset", defaultValue = "0") int offset, @RequestParam(value = "limit", defaultValue = "100") int limit) throws JsonProcessingException {
         Long memberId = getMemberId(request);
         return orderService.findOrdersByMemberId(memberId, offset, limit);
 
     }
 
-    @RequestMapping("/api/auth/v1/order/{orderId}/cancel")
+    @DeleteMapping("/api/auth/v1/order/{orderId}/cancel")
     @Operation(summary = "주문 취소", description = "주문을 취소합니다.")
-    public void cancelOrder(@PathVariable("orderId") Long orderId) {
+    public ResponseEntity<Boolean> cancelOrder(@PathVariable("orderId") Long orderId) {
         orderService.cancelOrder(orderId);
+        return ResponseEntity.ok(true);
     }
      private Long getMemberId(HttpServletRequest request) throws JsonProcessingException {
         return authService.getMemberIdFromAccessToken(request);

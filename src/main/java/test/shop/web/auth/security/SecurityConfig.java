@@ -40,13 +40,11 @@ public class SecurityConfig {
     private final CustomAuthEntryPointHandler customAuthEntryPointHandler;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private static final String[] AUTH_WHITELIST = {
-            "/v2/api-docs",
-            "/swagger-resources/**",
-            "/swagger-ui.html",
             "/webjars/**",
-            "/swagger/**",
-            "/swagger-ui/**",
-            "/h2-console/**",
+             "/h2-console/**",
+           "/v3/api-docs/**",
+        "/swagger-ui/**",
+        "/swagger-ui.html"
     };
 
 
