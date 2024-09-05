@@ -1,6 +1,8 @@
 package test.shop.web.controller.restcontroller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +24,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
+@Tag(name = "상품", description = "상품 API 입니다")
 public class ItemRestController {
 
     private final ItemService itemService;
@@ -30,6 +33,7 @@ public class ItemRestController {
 
 
     @RequestMapping("/api/admin/v1/product/new")
+    @Operation(summary = "상품 등록", description = "상품를 등록합니다.")
     public ResponseEntity<String> create(@RequestBody ProductDto form) {
         itemService.saveItem(form);
         //handling error
@@ -43,6 +47,7 @@ public class ItemRestController {
      * 상품 목록
      */
     @RequestMapping("/api/public/v1/all-products")
+    @Operation(summary = "메인 상품 목록", description = "메인의 상품 목록을 가져옵니다.")
     public ResponseEntity<Result<List<ProductDto>>> list() {
         List<ProductDto> productDtos = itemService.findAll();
         //handling error
@@ -56,6 +61,7 @@ public class ItemRestController {
      * 상품 상세
      */
     @RequestMapping("/api/public/v1/product/{itemId}")
+    @Operation(summary = "상품 상세", description = "상품 상세를 가져옵니다.")
     public ResponseEntity<Result<ProductDetailDto>> detail(@PathVariable("itemId") Long itemId) {
         ProductDetailDto dto = itemService.getItemDetail(itemId);
         //handling error
@@ -69,6 +75,7 @@ public class ItemRestController {
      * 상품 리뷰 작성
      */
     @RequestMapping("/api/auth/v1/product/{itemId}/review")
+    @Operation(summary = "상품 리뷰", description = "상품 리뷰를 작성합니다.")
     public ResponseEntity<Boolean> createReview(HttpServletRequest request, @RequestBody ReviewDto form, @PathVariable("itemId") Long itemId) throws JsonProcessingException {
         Long memberId = getMemberId(request);
         form.setUserId(memberId);
@@ -82,6 +89,7 @@ public class ItemRestController {
      * 상품 리뷰 삭제
      */
     @DeleteMapping("/api/auth/v1/review/delete")
+    @Operation(summary = "상품 리뷰 삭제", description = "상품 리뷰를 삭제합니다.")
     public ResponseEntity<Boolean> deleteReview(@RequestParam("id") Long reviewId) {
         reviewService.deleteReview(reviewId);
         //handling error
@@ -95,6 +103,7 @@ public class ItemRestController {
      * 전체 상품 리뷰 조회
      */
     @GetMapping("/api/public/v1/reviews")
+    @Operation(summary = "전체 상품 리뷰", description = "전체 상품 리뷰를 가져옵니다.")
     public ResponseEntity<Result<List<ReviewDto>>> listReviews(@RequestParam("id") Long itemId) {
         List<ReviewDto> dtos = reviewService.findReviews(itemId);
         //handling error
@@ -105,6 +114,7 @@ public class ItemRestController {
     }
 
     @GetMapping("/api/public/v1/products")
+    @Operation(summary = "상품 목록", description = "상품 목록을 가져옵니다.")
     public ResponseEntity<Page<ProductDto>> list(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(name = "category", required = false) String category,
@@ -123,21 +133,12 @@ public class ItemRestController {
     }
 
 
-    /**
-     * 상품 수정
-     */
-
-//    @RequestMapping("/api/v1/admin/product/{itemId}")
-//    public ResponseEntity<String> updateItem(@RequestBody ItemDto form, @PathVariable("itemId") Long itemId){
-//        Item item = ItemMapper.INSTANCE.toEntity(form);
-//        itemService.updateItem(item, itemId);
-//        return ResponseEntity.ok("상품이 수정되었습니다.");
-//    }
 
     /**
      * 상품 삭제
      */
     @RequestMapping("/api/admin/v1/product/{itemId}/delete")
+    @Operation(summary = "상품 삭제", description = "상품을 삭제합니다.")
     public ResponseEntity<String> deleteItem(@PathVariable("itemId") Long itemId) {
         itemService.deleteItem(itemId);
         return ResponseEntity.ok("상품이 삭제되었습니다.");
