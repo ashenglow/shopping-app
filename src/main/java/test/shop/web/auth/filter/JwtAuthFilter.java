@@ -37,9 +37,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             "/api/v1/register",
             "/api/v1/logout",
             "/api/v1/refresh",
-            "/swagger/**",
-            "/swagger-ui/**",
-            "/h2-console/**"
+            "/h2-console/**",
+            "/webjars/**",
+             "/v3/api-docs",
+        "/swagger-ui",
+        "/swagger-ui.html"
+
 
     );
 
@@ -47,15 +50,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String requestURI = request.getRequestURI();
         // Check for exact matches in the whitelist
-    if (WHITELIST.contains(requestURI)) {
+    if (WHITELIST.contains(requestURI)  || requestURI.startsWith("/swagger-ui/") || requestURI.startsWith("/v3/api-docs/") || requestURI.startsWith("/api/public/")) {
         log.info("Skipping JwtAuthFilter for whitelisted URI: {}", requestURI);
-        filterChain.doFilter(request, response);
-        return;
-    }
-
-    // Check for paths starting with /api/public
-    if (requestURI.startsWith("/api/public")) {
-        log.info("Skipping JwtAuthFilter for public API: {}", requestURI);
         filterChain.doFilter(request, response);
         return;
     }

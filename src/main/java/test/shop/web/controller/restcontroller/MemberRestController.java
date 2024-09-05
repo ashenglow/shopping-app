@@ -37,7 +37,7 @@ public class MemberRestController {
         return ResponseEntity.ok(true);
     }
 
-    @RequestMapping("/api/auth/v1/member/{memberId}/delete")
+    @DeleteMapping ("/api/auth/v1/member/{memberId}/delete")
     @Operation(summary = "회원 삭제", description = "회원 정보를 삭제합니다.")
     public ResponseEntity<String> deleteMember(@PathVariable("memberId") Long memberId) {
         memberService.delete(memberId);
