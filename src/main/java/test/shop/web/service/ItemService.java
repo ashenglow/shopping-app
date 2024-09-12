@@ -14,6 +14,7 @@ import test.shop.web.dto.ProductDetailDto;
 import test.shop.web.dto.ProductDto;
 import test.shop.web.repository.ItemRepository;
 import test.shop.web.repository.SpecificationBuilder;
+import test.shop.web.repository.SpecificationBuilderV2;
 
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +43,7 @@ public class ItemService {
         params.put("ratings", ratings);
         params.put("price", range);
         Pageable pageable = PageRequest.of(page, size);
-        Specification<Item> spec = new SpecificationBuilder<Item>().buildSpecification(params);
+        Specification<Item> spec = new SpecificationBuilderV2<Item>().buildSpecification(params);
         if (spec == null) {
             return itemRepository.findAll(pageable).map(Item::newProductDto);
         }
