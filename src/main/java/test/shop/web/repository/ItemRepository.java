@@ -10,8 +10,8 @@ import test.shop.domain.item.Item;
 import java.util.Optional;
 
 @Repository
-public interface ItemRepository extends JpaRepository<Item, Long>, JpaSpecificationExecutor<Item> {
+public interface ItemRepository extends JpaRepository<Item, Long>, JpaSpecificationExecutor<Item>, CustomItemRepository {
 
     Optional<Item> findItemById(Long itemId);
-    Optional<Page<Item>> findByAndCategoryAndRatings(String category, int ratings, Pageable pageable);
+    Optional<Page<Item>> findByAndCategoryAndRatings(String category,Integer ratings, Pageable pageable);
 }

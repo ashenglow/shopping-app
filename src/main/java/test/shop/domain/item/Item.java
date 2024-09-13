@@ -17,6 +17,9 @@ import java.util.List;
 
 @NoArgsConstructor
 @Entity
+@Table(name = "items", indexes = {
+        @Index(name = "idx_category_ratings", columnList = "category, ratings")
+})
 @Getter
 public class Item {
     @Id
@@ -25,11 +28,11 @@ public class Item {
     private Long id;
 
     private String name;
-    private int price;
+    private Integer price;
     private String description;
-    private int stockQuantity;
-    private int ratings;
-    private int numOfReviews;
+    private Integer stockQuantity;
+    private Integer ratings;
+    private Integer numOfReviews;
 
     @Enumerated(EnumType.STRING)
     private Category category;
@@ -40,11 +43,11 @@ public class Item {
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Images> images = new ArrayList<>();
 
-    public void modifyPrice(int price) {
+    public void modifyPrice(Integer price) {
         this.price = price;
     }
 
-    public void addStock(int quantity) {
+    public void addStock(Integer quantity) {
         this.stockQuantity += quantity;
     }
 
@@ -68,7 +71,7 @@ public class Item {
         this.images.add(images);
     }
 
-    public void removeStock(int quantity) {
+    public void removeStock(Integer quantity) {
         int restStock = this.stockQuantity - quantity;
         if (restStock < 0) {
             throw new NotEnoughStockException("need more stock");
@@ -76,7 +79,7 @@ public class Item {
         this.stockQuantity = restStock;
     }
 @Builder
-    public Item(String name, int price, int stockQuantity, String description, int ratings, int numOfReviews, Category category){
+    public Item(String name, Integer price, Integer stockQuantity, String description, Integer ratings, Integer numOfReviews, Category category){
         this.name = name;
         this.price = price;
         this.stockQuantity = stockQuantity;
@@ -98,7 +101,7 @@ public class Item {
         saveTestImages();
     }
 
-    public void updateItem(String name, int price, int stockQuantity, String description, int ratings, int numOfReviews, Category category){
+    public void updateItem(String name, Integer price, Integer stockQuantity, String description, Integer ratings, Integer numOfReviews, Category category){
         this.name = name;
         this.price = price;
         this.stockQuantity = stockQuantity;

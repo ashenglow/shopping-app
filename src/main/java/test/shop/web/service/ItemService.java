@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import test.shop.domain.item.Category;
 import test.shop.domain.item.Item;
 import test.shop.utils.Range;
 import test.shop.web.dto.ProductDetailDto;
@@ -37,19 +38,25 @@ public class ItemService {
 
     }
 
-    public Page<ProductDto> findItems(int page, int size, Range<Integer> range, String category, int ratings) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("category", category);
-        params.put("ratings", ratings);
-        params.put("price", range);
-        Pageable pageable = PageRequest.of(page, size);
-        Specification<Item> spec = new SpecificationBuilderV2<Item>().buildSpecification(params);
-        if (spec == null) {
-            return itemRepository.findAll(pageable).map(Item::newProductDto);
-        }
-        return itemRepository.findAll(spec, pageable).map(Item::newProductDto);
+//    public Page<ProductDto> findItems(int page, int size, Range<Integer> range, String category, int ratings) {
+//        Map<String, Object> params = new HashMap<>();
+//        params.put("category", category);
+//        params.put("ratings", ratings);
+//        params.put("price", range);
+//        Pageable pageable = PageRequest.of(page, size);
+//        Specification<Item> spec = new SpecificationBuilderV2<Item>().buildSpecification(params);
+//        if (spec == null) {
+//            return itemRepository.findAll(pageable).map(Item::newProductDto);
+//        }
+//        return itemRepository.findAll(spec, pageable).map(Item::newProductDto);
+//
+//    }
 
+    public Page<ProductDto> findItems(int page, int size, Integer minPrice, Integer maxPrice, Category category, Integer minRating) {
+        Pageable pageable = PageRequest.of(page, size);
+        return itemRepository.findItemsWithFilters(pageable,  minPrice, maxPrice,category, minRating);
     }
+
 
     public List<ProductDto> findAll() {
         List<ProductDto> dtos = itemRepository.findAll().stream().map(Item::newProductDto).collect(Collectors.toList());

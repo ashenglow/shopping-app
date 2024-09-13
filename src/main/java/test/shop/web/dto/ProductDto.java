@@ -1,28 +1,35 @@
 package test.shop.web.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import test.shop.domain.item.Category;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class ProductDto{
 
     private Long id;
     private String name;
-    private int price;
-    private int stockQuantity;
+    private Integer price;
+    private Integer stockQuantity;
     private String description;
-    private int ratings;
-    private int numOfReviews;
+    private Integer ratings;
+    private Integer numOfReviews;
     private Category category;
     private List<ImageDto> images;
 
-    public ProductDto() {
+    public ProductDto(Long id, String name, Integer price, Integer stockQuantity, Integer ratings, Integer numOfReviews, Category category) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.stockQuantity = stockQuantity;
+        this.ratings = ratings;
+        this.numOfReviews = numOfReviews;
+        this.category = category;
+        this.images = new ArrayList<>();
     }
-
 }

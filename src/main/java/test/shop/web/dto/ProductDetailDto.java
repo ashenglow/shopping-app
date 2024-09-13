@@ -13,15 +13,17 @@ import java.util.List;
 public class ProductDetailDto {
     private Long id;
     private String name;
-    private int price;
-    private int stockQuantity;
+    private Integer price;
+    private Integer stockQuantity;
     private String description;
-    private int ratings;
-    private int numOfReviews;
+    private Integer ratings;
+    private Integer numOfReviews;
     private Category category;
     private List<ReviewDto> reviews;
     private List<ImageDto> images;
 
     public ProductDetailDto() {
+
+
     }
 }

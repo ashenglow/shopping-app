@@ -1,6 +1,7 @@
 package test.shop.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,6 +55,13 @@ public class ExControllerAdvice {
         log.error("[exceptionHandle] ex", e);
         ErrorResult errorResult = new ErrorResult("EX", e.getMessage());
         return new ResponseEntity<>(errorResult, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(ConversionFailedException.class)
+    public ResponseEntity<ErrorResult> handleConversionFailedException(ConversionFailedException e) {
+        log.error("[exceptionHandle] ex ", e);
+        ErrorResult errorResult = new ErrorResult("BAD_REQUEST", e.getMessage());
+        return new ResponseEntity<>(errorResult, HttpStatus.BAD_REQUEST);
     }
 
 }
