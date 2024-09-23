@@ -146,6 +146,8 @@ public class SecurityConfig {
         configuration.addAllowedOrigin("http://www.soolstore.r-e.kr");
         configuration.addAllowedOrigin("http://localhost:3000");
         configuration.addAllowedOrigin("http://localhost:8080");
+        configuration.addAllowedOrigin("https://open-api.kakaopay.com");
+        configuration.addAllowedOrigin("https://online-pay.kakao.com");
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE", "PUT", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
