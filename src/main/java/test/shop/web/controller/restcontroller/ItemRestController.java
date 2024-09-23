@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -65,6 +66,7 @@ public class ItemRestController {
         }
         return ResponseEntity.status(HttpStatus.OK).body(itemsPage);
     }
+
 
 //    @Hidden
 //    @RequestMapping("/api/public/v1/all-products")
