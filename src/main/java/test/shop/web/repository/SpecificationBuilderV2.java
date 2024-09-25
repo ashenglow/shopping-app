@@ -41,15 +41,17 @@ public class SpecificationBuilderV2<T> {
         if (value instanceof String) {
             return builder.like(path.as(String.class), "%" + value + "%");
         } else if (value instanceof Number) {
+           if(((Number)value).intValue() == 0) {
+               return null;// Return null for rating 0
+           }
             return builder.equal(path, value);
         } else if (value instanceof Boolean) {
             return builder.equal(path, value);
         } else if (value instanceof Enum<?>) {
             return builder.equal(path, value);
         } else if (value instanceof Range<?>) {
-            Range range = (Range) value; //fixed to Number
-
-            return builder.between((Path<Comparable>) path, range.getLowerBound(), range.getUpperBound());
+            Range<?> range = (Range<?>) value; //fixed to Number
+            return builder.between((Path<Comparable>) path, (Comparable)range.getLowerBound(), (Comparable) range.getUpperBound());
 
 
         }
