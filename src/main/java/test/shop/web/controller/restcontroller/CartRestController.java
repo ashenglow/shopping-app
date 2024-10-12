@@ -39,12 +39,12 @@ public class CartRestController {
         return ResponseEntity.ok("Add item success");
     }
 
-    @DeleteMapping("/api/auth/v1/cart/{itemId}")
+    @DeleteMapping("/api/auth/v1/cart")
     @Operation(summary = "장바구니 상품 삭제", description = "장바구니에서 상품을 삭제합니다.")
-    public ResponseEntity<Long> deleteCartItem(HttpServletRequest request, @PathVariable("itemId") Long itemId) throws JsonProcessingException {
+    public ResponseEntity<List<Long>> deleteCartItems(HttpServletRequest request, @RequestBody List<Long> itemIds) throws JsonProcessingException {
         Long memberId = getMemberId(request);
-        Long removedItemId = cartService.deleteCartItem(itemId, memberId);
-        return ResponseEntity.ok(removedItemId);
+        List<Long> removedItemIds = cartService.deleteCartItems(itemIds, memberId);
+        return ResponseEntity.ok(removedItemIds);
     }
 
     @PutMapping("/api/auth/v1/cart/update/{itemId}")

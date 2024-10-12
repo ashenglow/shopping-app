@@ -17,6 +17,7 @@ import test.shop.web.repository.CartRepository;
 import test.shop.web.repository.ItemRepository;
 import test.shop.web.repository.MemberRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -88,13 +89,17 @@ public class CartService {
     }
 
     @Transactional
-    public Long deleteCartItem(Long itemId, Long memberId) {
+    public List<Long> deleteCartItems(List<Long> itemIds, Long memberId) {
         Cart cart = getCartByMemberId(memberId);
-        CartItem cartItem = findCartItem(cart, itemId);
-        cartItem.delete();
+        List<Long> removedItemIds = new ArrayList<>();
+        for (Long itemId : itemIds) {
+            CartItem cartItem = findCartItem(cart, itemId);
+            cartItem.delete();
+            removedItemIds.add(itemId);
+        }
         cartRepository.save(cart);
-        log.info("[CartService] Deleted cart item: itemId={}, memberId={}", itemId, memberId);
-        return itemId;
+        log.info("[CartService] Deleted cart items: itemId={}, memberId={}", itemIds, memberId);
+        return removedItemIds;
     }
 
 
