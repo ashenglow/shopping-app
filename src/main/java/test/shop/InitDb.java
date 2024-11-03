@@ -3,16 +3,18 @@ package test.shop;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import test.shop.domain.*;
-import test.shop.domain.item.Category;
-import test.shop.web.dto.ProductDto;
-import test.shop.web.dto.ReviewDto;
-import test.shop.web.repository.ItemRepository;
-import test.shop.web.repository.MemberRepository;
-import test.shop.web.repository.ReviewRepository;
-import test.shop.web.service.ItemService;
-import test.shop.web.service.MemberService;
-import test.shop.web.service.ReviewService;
+import test.shop.domain.model.item.Category;
+import test.shop.domain.model.member.Member;
+import test.shop.domain.model.member.MemberType;
+import test.shop.domain.value.Address;
+import test.shop.application.dto.request.ProductDto;
+import test.shop.application.dto.request.ReviewDto;
+import test.shop.domain.repository.ItemRepository;
+import test.shop.domain.repository.MemberRepository;
+import test.shop.domain.repository.ReviewRepository;
+import test.shop.application.service.item.ItemService;
+import test.shop.application.service.member.MemberService;
+import test.shop.application.service.review.ReviewService;
 
 @Component
 @RequiredArgsConstructor
