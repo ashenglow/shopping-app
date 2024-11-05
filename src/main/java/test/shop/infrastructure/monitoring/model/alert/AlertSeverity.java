@@ -1,4 +1,8 @@
 package test.shop.infrastructure.monitoring.model.alert;
 
-public class AlertSeverity {
+public enum AlertSeverity {
+    INFO,
+    WARNING,
+    ERROR,
+    CRITICAL
 }

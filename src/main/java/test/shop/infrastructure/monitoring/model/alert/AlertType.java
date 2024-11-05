@@ -1,4 +1,9 @@
 package test.shop.infrastructure.monitoring.model.alert;
 
-public class AlertType {
+public enum AlertType {
+    SLOW_QUERY,
+    HIGH_AVERAGE_TIME,
+    ERROR_RATE,
+    CONSECUTIVE_SLOW_QUERIES,
+    PATTERN_DETECTED
 }

@@ -35,11 +35,15 @@ public class SecurityConfig {
     private final CustomAuthEntryPointHandler customAuthEntryPointHandler;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private static final String[] AUTH_WHITELIST = {
+            "/api/public/**",
+            "/monitoring/**",
             "/webjars/**",
              "/h2-console/**",
            "/v3/api-docs/**",
         "/swagger-ui/**",
-        "/swagger-ui.html"
+        "/swagger-ui.html",
+            "/favicon.ico",
+            "/static/**"
     };
 
 
@@ -120,6 +124,7 @@ public class SecurityConfig {
         //인가 설정
         http.authorizeHttpRequests((authorize) -> authorize
                 .requestMatchers(AUTH_WHITELIST).permitAll()
+                .requestMatchers("/api/public/monitoring/**").permitAll()
                 .requestMatchers("/api/public/**","/api/v1/login", "/api/v1/register", "/api/v1/logout", "/api/v1/refresh").permitAll()
                 .requestMatchers(("/api/auth/**")).authenticated()
                 .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
