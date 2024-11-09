@@ -41,6 +41,14 @@ public class InitDb {
         }
     }
 
+    public void reinitialize(){
+        memberRepository.deleteAll();
+        itemRepository.deleteAll();
+        reviewRepository.deleteAll();
+
+        init();
+    }
+
     private boolean isDatabaseEmpty() {
         return memberRepository.count() == 0 &&
                itemRepository.count() == 0 &&
