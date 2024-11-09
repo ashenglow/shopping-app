@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Query Performance Dashboard</title>
+    <link rel="icon" href="data:,">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment"></script>
+    <style>
+        .dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .chart-container {
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        .summary-box {
+            background: #f5f5f5;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 5px;
+        }
+    </style>
+    <script>
+        class DashboardAuth {
+            constructor() {
+                this.token = localStorage.getItem('accessToken');
+                this.baseUrl = 'http://localhost:8080' || '';
+            }
+
+            async login() {
+                try {
+                    const response = await fetch('/api/v1/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            username: 'user1',
+                            password: '1234'
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Login failed');
+                    }
+
+                    const data = await response.json();
+                    this.token = data.accessToken;
+                    localStorage.setItem('accessToken', this.token);
+                    return this.token;
+                } catch (error) {
+                    console.error('Login failed:', error);
+                    throw error;
+                }
+            }
+
+            async fetchWithAuth(endpoint) {
+                try {
+                    if (!this.token) {
+                        await this.login();
+                    }
+
+                    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+                        headers: {
+                            'Authorization': `Bearer ${this.token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include'
+                    });
+
+                    if (response.status === 401) {
+
+                        await this.login();
+                        // Retry the request
+                        return this.fetchWithAuth(endpoint);
+                    }
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    return await response.json();
+                } catch (error) {
+                    console.error('API request failed:', error);
+                    throw error;
+                }
+            }
+        }
+
+        // Dashboard initialization
+        const dashboard = new DashboardAuth();
+
+        async function initDashboard() {
+            try {
+                // Try to fetch metrics
+                const metrics = await dashboard.fetchWithAuth('/api/public/monitoring/metrics');
+                updateDashboard(metrics);
+            } catch (error) {
+                console.error('Failed to initialize dashboard:', error);
+                // Show login error to user
+                document.getElementById('error-message').textContent =
+                    'Failed to load dashboard. Please check your credentials.';
+            }
+        }
+
+        function updateDashboard(metrics) {
+            // Update your charts and metrics display here
+            // Example:
+            if (metrics.queryStats) {
+                updateQueryStats(metrics.queryStats);
+            }
+            if (metrics.performanceData) {
+                updatePerformanceCharts(metrics.performanceData);
+            }
+        }
+
+        // Start dashboard when page loads
+        document.addEventListener('DOMContentLoaded', initDashboard);
+    </script>
+</head>
+<body>
+<div class="dashboard">
+    <h1>Query Performance Dashboard</h1>
+
+    <div class="summary-container">
+        <div class="summary-box">
+            <h3>Performance Summary</h3>
+            <div id="summary-data"></div>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="responseTimeChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="methodStatsChart"></canvas>
+    </div>
+
+    <div class="slow-queries-container">
+        <h3>Recent Slow Queries</h3>
+        <div id="slow-queries-table"></div>
+    </div>
+</div>
+</body>
+</html>

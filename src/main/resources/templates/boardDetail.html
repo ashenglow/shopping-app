@@ -19,7 +19,7 @@
 <!--            th:text="${board.getAttachFile().getOriginalFilename()}"/></li>-->
             <li>이미지파일
                 <img th:if="${not #lists.isEmpty(board.imageFiles)}" th:each="imageFile : ${board.imageFiles}"
-                     th:src="|/images/${imageFile.getStoreFileName()}|" width="100" height="100"></li>
+                     th:src="|/image/${imageFile.getStoreFileName()}|" width="100" height="100"></li>
         </ul>
     </div>
     <div th:replace="~{fragments/footer :: footer}"/>
