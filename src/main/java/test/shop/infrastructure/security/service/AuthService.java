@@ -8,8 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import test.shop.application.dto.request.MemberJoinRequestDto;
 import test.shop.domain.model.member.Member;
 import test.shop.domain.model.exception.CustomTokenException;
+import test.shop.domain.model.member.MemberType;
 import test.shop.exception.web.CustomRefreshTokenFailException;
 import test.shop.infrastructure.persistence.redis.RedisService;
 import test.shop.infrastructure.security.jwt.TokenSubject;
@@ -33,10 +35,47 @@ public class AuthService {
     private final MemberRepository memberRepository;
 
     @Transactional(readOnly = false)
-    public void register(ProfileDto dto) throws JsonProcessingException {
-        Member member = new Member();
-        member.createMember(dto);
+    public void register(MemberJoinRequestDto dto) throws JsonProcessingException {
+        Member member = buildMemberFromDto(dto);
         memberRepository.save(member);
+    }
+
+    @Transactional(readOnly = false)
+    public void adminRegister(MemberJoinRequestDto dto) throws JsonProcessingException {
+        Member member = buildAdminFromDto(dto);
+        memberRepository.save(member);
+    }
+
+
+    private Member buildMemberFromDto(MemberJoinRequestDto dto){
+        Member member = Member.builder()
+                .username(dto.getUsername())
+                .password(dto.getPassword())
+                .memberType(MemberType.USER)
+                .address(dto.getAddress())
+                .build();
+        if( dto.getUserImg() == null){
+            member.addUserImg("https://i.pravatar.cc/300");
+        }else {
+            member.addUserImg(dto.getUserImg());
+        }
+        return member;
+    }
+
+    private Member buildAdminFromDto(MemberJoinRequestDto dto){
+        Member member = Member.builder()
+                .username(dto.getUsername())
+                .password(dto.getPassword())
+                .memberType(MemberType.ADMIN)
+                .address(dto.getAddress())
+                .build();
+
+        if( dto.getUserImg() == null){
+            member.addUserImg("https://i.pravatar.cc/300");
+        }else {
+            member.addUserImg(dto.getUserImg());
+        }
+        return member;
     }
 
     public UserModelDto login(MemberLoginDto dto) throws JsonProcessingException {

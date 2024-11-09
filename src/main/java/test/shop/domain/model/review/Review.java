@@ -1,6 +1,7 @@
 package test.shop.domain.model.review;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import test.shop.domain.model.item.Item;
@@ -25,6 +26,7 @@ public class Review {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @Builder
     public Review(int rating, String comment) {
         this.rating = rating;
         this.comment = comment;
@@ -40,24 +42,17 @@ public class Review {
         member.addReview(this);
     }
 
-    public static Review createReview(int rating, String comment, Item item, Member member) {
-        Review review = new Review(rating, comment);
-        review.saveItem(item);
-        review.saveMember(member);
-        return review;
-    }
 
+public ReviewDto toReviewDto() {
+        return ReviewDto.builder()
+                .id(this.id)
+                .productId(this.getItem().getId())
+                .userId(this.getMember().getId())
+                .username(this.getMember().getUsername())
+                .userImg(this.getMember().getUserImg())
+                .rating(this.getRating())
+                .comment(this.getComment())
+                .build();
+}
 
-
-    public static ReviewDto newReviewDto(Review review) {
-        ReviewDto reviewDto = new ReviewDto();
-        reviewDto.setId(review.getId());
-        reviewDto.setUsername(review.getMember().getUsername());
-        reviewDto.setUserId(review.getMember().getId());
-        reviewDto.setProductId(review.getItem().getId());
-        reviewDto.setUserImg(review.getMember().getUserImg());
-        reviewDto.setRating(review.getRating());
-        reviewDto.setComment(review.getComment());
-        return reviewDto;
-    }
 }

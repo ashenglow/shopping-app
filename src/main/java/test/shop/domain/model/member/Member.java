@@ -2,6 +2,7 @@ package test.shop.domain.model.member;
 
 import jakarta.persistence.*;
 import lombok.*;
+import test.shop.application.dto.request.MemberJoinRequestDto;
 import test.shop.domain.value.Address;
 import test.shop.domain.model.review.Review;
 import test.shop.domain.model.order.Order;
@@ -43,20 +44,11 @@ public class Member {
         this.memberType = memberType;
         this.username = username;
         this.address = address;
-        saveTestUserImg();
+
     }
 
-    private void saveTestUserImg() {
-        this.userImg = "https://i.pravatar.cc/300";
-    }
-
-    public Member createMember(ProfileDto form) {
-        this.username = form.getUsername();
-        this.password = form.getPassword();
-        this.memberType = MemberType.USER;
-        this.address = form.getAddress();
-
-        return this;
+    public void addUserImg(String url){
+        this.userImg = url;
     }
 
     public void addOrder(Order order) {
@@ -72,6 +64,27 @@ public class Member {
         this.username = username;
         this.address = address;
     }
+
+    public MemberJoinRequestDto toMemberJoinRequestDto() {
+        return MemberJoinRequestDto.builder()
+                .id(this.id)
+                .username(this.username)
+                .memberType(MemberType.USER)
+                .password(this.password)
+                .address(this.address)
+                .build();
+    }
+
+    public MemberJoinRequestDto toAdminJoinRequestDto() {
+        return MemberJoinRequestDto.builder()
+                .id(this.id)
+                .username(this.username)
+                .memberType(MemberType.ADMIN)
+                .password(this.password)
+                .address(this.address)
+                .build();
+    }
+
 
     public UserModelDto toUserModelDto(String accessToken) {
         UserModelDto userModelDto = new UserModelDto();
@@ -91,4 +104,6 @@ public class Member {
         profileDto.setAddress(address);
         return profileDto;
     }
+
+
 }

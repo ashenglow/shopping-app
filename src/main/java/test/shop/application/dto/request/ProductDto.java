@@ -4,8 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import test.shop.domain.model.item.Category;
-import test.shop.application.dto.response.ImageDto;
+import test.shop.application.dto.response.ResponseImageDto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -21,9 +22,21 @@ public class ProductDto{
     private int ratings;
     private int numOfReviews;
     private Category category;
-    private List<ImageDto> images;
+    private String thumbnailUrl;
+    @Builder.Default
+    private List<ResponseImageDto> images = new ArrayList<>();
+
+    public void addImage(String url) {
+        if (images == null) {
+            images = new ArrayList<>();
+        }
+        images.add(ResponseImageDto.builder()
+                .url(url)
+                .build());
+    }
 
     public ProductDto() {
+        this.images = new ArrayList<>();
     }
 
 }

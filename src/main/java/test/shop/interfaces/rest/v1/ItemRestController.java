@@ -102,7 +102,7 @@ public class ItemRestController {
         form.setUserId(memberId);
         String username = getUsername(request);
         form.setUsername(username);
-        reviewService.saveReview(form, itemId);
+        reviewService.saveReview(form);
         return ResponseEntity.status(HttpStatus.CREATED).body(true);
     }
 

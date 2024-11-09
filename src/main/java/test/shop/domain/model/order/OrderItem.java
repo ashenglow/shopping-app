@@ -2,7 +2,7 @@ package test.shop.domain.model.order;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import test.shop.domain.model.item.Images;
+import test.shop.domain.model.item.Image;
 import test.shop.domain.model.item.Item;
 import test.shop.application.dto.response.ItemDto;
 import test.shop.application.dto.request.OrderRequestDto;
@@ -62,7 +62,7 @@ public class OrderItem {
         itemDto.setId(getItem().getId());
         itemDto.setName(getItem().getName());
         itemDto.setPrice(getPrice());
-        itemDto.setImages(getItem().getImages().stream().map(Images::newImageDto).collect(Collectors.toList()));
+        itemDto.setImages(getItem().getImages().stream().map(Image::toDto).collect(Collectors.toList()));
         itemDto.setStockQuantity(getItem().getStockQuantity());
         itemDto.setCount(getCount());
         return itemDto;

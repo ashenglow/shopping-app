@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import test.shop.application.dto.request.MemberJoinRequestDto;
 import test.shop.infrastructure.security.jwt.TokenUtil;
 import test.shop.application.dto.request.ProfileDto;
 import test.shop.application.dto.response.MemberLoginDto;
@@ -28,7 +29,7 @@ public class AuthApiController {
 
     @PostMapping("/api/v1/register")
     @Operation(summary = "회원 등록", description = "회원을 등록합니다.")
-    public ResponseEntity<String> register(@RequestBody ProfileDto request, HttpServletResponse response) throws JsonProcessingException {
+    public ResponseEntity<String> register(@RequestBody MemberJoinRequestDto request, HttpServletResponse response) throws JsonProcessingException {
         authService.register(request);
         return ResponseEntity.status(200).body("회원이 등록되었습니다.");
     }

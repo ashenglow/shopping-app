@@ -21,7 +21,7 @@ public class ProductDetailDto {
     private int numOfReviews;
     private Category category;
     private List<ReviewDto> reviews;
-    private List<ImageDto> images;
+    private List<ResponseImageDto> images;
 
     public ProductDetailDto() {
     }

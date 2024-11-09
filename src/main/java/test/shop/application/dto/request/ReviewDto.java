@@ -6,17 +6,17 @@ import lombok.*;
 @Setter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class ReviewDto {
     private Long id;
-    private String username;
+    private Long productId;
     private Long userId;
+    private String username;
     private String userImg;
     private int rating;
     private String comment;
-    private Long productId;
 
-    public ReviewDto() {
-    }
+
 
 
 }

@@ -3,7 +3,7 @@ package test.shop.domain.model.cart;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import test.shop.domain.model.item.Images;
+import test.shop.domain.model.item.Image;
 import test.shop.domain.model.item.Item;
 import test.shop.application.dto.response.ItemDto;
 
@@ -69,7 +69,7 @@ public class CartItem {
         itemDto.setPrice(getPrice());
         itemDto.setCount(getCount());
         itemDto.setStockQuantity(getItem().getStockQuantity());
-        itemDto.setImages(getItem().getImages().stream().map(Images::newImageDto).toList());
+        itemDto.setImages(getItem().getImages().stream().map(Image::toDto).toList());
         return itemDto;
     }
 
