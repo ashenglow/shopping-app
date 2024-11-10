@@ -56,8 +56,16 @@ public class ItemRestController {
             @RequestParam(name = "ratings", defaultValue = "0") double ratings) {
 
         int size = 10;
-        Range<Integer> range = new Range<>(minPrice, maxPrice);
-        Page<ProductDto> itemsPage = itemService.findItems(page, size, range, category, ratings);
+        Range<Double> ratingsRange;
+        if(ratings ==0){
+            ratingsRange = new Range<>(0.0, 5.0); //show all ratings
+        }else{
+            ratingsRange = new Range<>(ratings, 5.0); // show ratings >= selected value
+        }
+
+
+        Range<Integer> priceRange = new Range<>(minPrice, maxPrice);
+        Page<ProductDto> itemsPage = itemService.findItems(page, size, priceRange, category, ratingsRange);
         //handling error
         if (itemsPage == null) {
             return ResponseEntity.notFound().build();

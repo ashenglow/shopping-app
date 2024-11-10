@@ -35,20 +35,24 @@ public class ReviewService {
                 .orElseThrow(() -> new EntityNotFoundException("Item not found"));
 
         Review review = buildReviewFromDto(form, member, item);
-        reviewRepository.save(review);
-       }
+
+        // set associations
+        review.saveMember(member);
+        review.saveItem(item);
+
+        // save review
+        Review savedReview = reviewRepository.save(review);
+
+        // update item statistics
+        item.updateReviewStats();
+        itemRepository.save(item);
+    }
 
        private Review buildReviewFromDto(ReviewDto dto, Member member, Item item) {
-           Review review = Review.builder()
+           return Review.builder()
                    .rating(dto.getRating())
                    .comment(dto.getComment())
                    .build();
-           review.saveMember(member);
-           review.saveItem(item);
-
-           itemRepository.save(item); // save updated item stats
-           return review;
-
        }
 
 
@@ -58,10 +62,17 @@ public class ReviewService {
                    .orElseThrow(() -> new EntityNotFoundException("Review not found"));
             // remove review in Item
            Item item = review.getItem();
-           item.removeReview(review);
 
-           reviewRepository.deleteById(reviewId);
-           itemRepository.save(item); // save updated item stats
+           // remove associations
+           review.saveItem(null);
+           review.saveMember(null);
+
+           // delete review
+           reviewRepository.delete(review);
+
+           // update item statistics
+           item.updateReviewStats();
+           itemRepository.save(item);
        }
        public List<ReviewDto> findReviews(Long itemId) {
            List<Review> reviews = reviewRepository.findByItemId(itemId)

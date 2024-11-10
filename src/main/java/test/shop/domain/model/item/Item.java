@@ -79,21 +79,26 @@ public class Item {
     }
 
     // Review methods
-    public void addReview(Review review) {
-        reviews.add(review);
-        updateReviewStats();
-    }
-    public void removeReview(Review review) {
-        reviews.remove(review);
-        updateReviewStats();
-    }
-    private void updateReviewStats(){
+
+    public void updateReviewStats(){
         this.numOfReviews = this.reviews.size();
         this.ratings = this.reviews.stream()
                 .mapToDouble(Review::getRating)
                 .average()
                 .orElse(0.0);
     }
+
+    public void addReview(Review review) {
+        if(!this.reviews.contains(review)){
+            this.reviews.add(review);
+            if(review.getItem() != null){
+                review.saveItem(this);
+            }
+            updateReviewStats();
+        }
+    }
+
+
 
     public void saveCategory(Category category) {
         this.category = category;
