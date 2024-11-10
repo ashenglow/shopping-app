@@ -17,7 +17,7 @@ public class ProductDetailDto {
     private int price;
     private int stockQuantity;
     private String description;
-    private int ratings;
+    private double ratings;
     private int numOfReviews;
     private Category category;
     private List<ReviewDto> reviews;

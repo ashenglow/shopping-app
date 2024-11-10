@@ -167,7 +167,7 @@ public class InitDb {
         }
 
         private ProductDto createProduct(String name, int price, int stock,
-                                         String description, Category category, int ratings, int numOfReviews, String url) {
+                                         String description, Category category, double ratings, int numOfReviews, String url) {
             ProductDto dto = ProductDto.builder()
                     .name(name)
                     .price(price)
@@ -228,7 +228,7 @@ public class InitDb {
 
 
         private ReviewDto createReview(Long productId, Long userId, String username,
-                                       int rating, String comment) {
+                                       double rating, String comment) {
             return ReviewDto.builder()
                     .productId(productId)
                     .userId(userId)

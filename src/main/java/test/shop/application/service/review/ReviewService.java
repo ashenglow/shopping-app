@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ReviewService {
-    private final ItemService itemService;
+    private final ItemRepository itemRepository;
     private final MemberService memberService;
     private final ReviewRepository reviewRepository;
 
@@ -30,7 +30,10 @@ public class ReviewService {
     public void saveReview(ReviewDto form) {
 
         Member member = memberService.findMemberById(form.getUserId());
-        Item item = itemService.findOne(form.getProductId());
+
+        Item item = itemRepository.findItemById(form.getProductId())
+                .orElseThrow(() -> new EntityNotFoundException("Item not found"));
+
         Review review = buildReviewFromDto(form, member, item);
         reviewRepository.save(review);
        }
@@ -42,6 +45,8 @@ public class ReviewService {
                    .build();
            review.saveMember(member);
            review.saveItem(item);
+
+           itemRepository.save(item); // save updated item stats
            return review;
 
        }
@@ -49,7 +54,14 @@ public class ReviewService {
 
        @Transactional(readOnly = false)
        public void deleteReview(Long reviewId) {
+           Review review = reviewRepository.findById(reviewId)
+                   .orElseThrow(() -> new EntityNotFoundException("Review not found"));
+            // remove review in Item
+           Item item = review.getItem();
+           item.removeReview(review);
+
            reviewRepository.deleteById(reviewId);
+           itemRepository.save(item); // save updated item stats
        }
        public List<ReviewDto> findReviews(Long itemId) {
            List<Review> reviews = reviewRepository.findByItemId(itemId)

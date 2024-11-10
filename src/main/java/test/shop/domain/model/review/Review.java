@@ -15,7 +15,7 @@ public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private int rating;
+    private double rating;
     private String comment;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -27,7 +27,7 @@ public class Review {
     private Member member;
 
     @Builder
-    public Review(int rating, String comment) {
+    public Review(double rating, String comment) {
         this.rating = rating;
         this.comment = comment;
     }
@@ -41,6 +41,7 @@ public class Review {
         this.member = member;
         member.addReview(this);
     }
+
 
 
 public ReviewDto toReviewDto() {
