@@ -13,7 +13,7 @@ public class ReviewDto {
     private Long userId;
     private String username;
     private String userImg;
-    private int rating;
+    private double rating;
     private String comment;
 
 

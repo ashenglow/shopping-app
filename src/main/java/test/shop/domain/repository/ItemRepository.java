@@ -13,5 +13,5 @@ import java.util.Optional;
 public interface ItemRepository extends JpaRepository<Item, Long>, JpaSpecificationExecutor<Item> {
 
     Optional<Item> findItemById(Long itemId);
-    Optional<Page<Item>> findByAndCategoryAndRatings(String category, int ratings, Pageable pageable);
+    Optional<Page<Item>> findByAndCategoryAndRatings(String category, double ratings, Pageable pageable);
 }
