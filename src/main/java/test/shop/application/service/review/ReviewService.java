@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ReviewService {
-    private final ItemService itemService;
+    private final ItemRepository itemRepository;
     private final MemberService memberService;
     private final ReviewRepository reviewRepository;
 
@@ -30,26 +30,49 @@ public class ReviewService {
     public void saveReview(ReviewDto form) {
 
         Member member = memberService.findMemberById(form.getUserId());
-        Item item = itemService.findOne(form.getProductId());
+
+        Item item = itemRepository.findItemById(form.getProductId())
+                .orElseThrow(() -> new EntityNotFoundException("Item not found"));
+
         Review review = buildReviewFromDto(form, member, item);
-        reviewRepository.save(review);
-       }
+
+        // set associations
+        review.saveMember(member);
+        review.saveItem(item);
+
+        // save review
+        Review savedReview = reviewRepository.save(review);
+
+        // update item statistics
+        item.updateReviewStats();
+        itemRepository.save(item);
+    }
 
        private Review buildReviewFromDto(ReviewDto dto, Member member, Item item) {
-           Review review = Review.builder()
+           return Review.builder()
                    .rating(dto.getRating())
                    .comment(dto.getComment())
                    .build();
-           review.saveMember(member);
-           review.saveItem(item);
-           return review;
-
        }
 
 
        @Transactional(readOnly = false)
        public void deleteReview(Long reviewId) {
-           reviewRepository.deleteById(reviewId);
+           Review review = reviewRepository.findById(reviewId)
+                   .orElseThrow(() -> new EntityNotFoundException("Review not found"));
+            // remove review in Item
+           Item item = review.getItem();
+
+           // remove associations
+           review.saveItem(null);
+           review.saveMember(null);
+
+           // delete review
+           reviewRepository.delete(review);
+
+           // update item statistics
+           item.updateReviewStats();
+           itemRepository.save(item);
        }
        public List<ReviewDto> findReviews(Long itemId) {
            List<Review> reviews = reviewRepository.findByItemId(itemId)

@@ -35,9 +35,7 @@ public class InitDb {
     @PostConstruct
     public void init() {
         if (isDatabaseEmpty()) {
-            initService.memberInit();
-            initService.itemInit();
-            initService.reviewInit();
+            initService.dbInit1();
         }
     }
 
@@ -64,7 +62,7 @@ public class InitDb {
         private final ReviewService reviewService;
 
 
-        public void memberInit() {
+        public void dbInit1() {
             // Admin user
             MemberJoinRequestDto adminUser = createAdminJoinRequestDto("user1", "1234", new Address("Seoul", "Jongno-gu", "03181"));
             // Regular users
@@ -96,30 +94,10 @@ public class InitDb {
                 System.err.println("Failed to save admin member ");
                 e.printStackTrace();
             }
+            /**
+             * Create & Save Items
+             */
 
-
-        }
-        private MemberJoinRequestDto createMemberJoinRequestDto(String name, String password, Address address) {
-            return MemberJoinRequestDto.builder()
-                    .username(name)
-                    .password(password)
-                    .memberType(MemberType.USER)
-                    .address(address)
-                    .build();
-
-        }
-
-        private MemberJoinRequestDto createAdminJoinRequestDto(String name, String password, Address address) {
-            return MemberJoinRequestDto.builder()
-                    .username(name)
-                    .password(password)
-                    .memberType(MemberType.ADMIN)
-                    .address(address)
-                    .build();
-
-        }
-
-        public void itemInit() {
             List<ProductDto> initialItems = Arrays.asList(
                     createProduct("Jipyeong Makgeolli", 8000, 200,
                             "Smooth and slightly sweet traditional rice wine", Category.TAKJU,5,50, "https://i.ibb.co/TvL4xvn/c6c3e71f-fe4f-4bfb-b80a-d00d349ade54.png"),
@@ -164,26 +142,10 @@ public class InitDb {
                     e.printStackTrace();
                 }
             }
-        }
 
-        private ProductDto createProduct(String name, int price, int stock,
-                                         String description, Category category, int ratings, int numOfReviews, String url) {
-            ProductDto dto = ProductDto.builder()
-                    .name(name)
-                    .price(price)
-                    .stockQuantity(stock)
-                    .description(description)
-                    .category(category)
-                    .ratings(ratings)
-                    .numOfReviews(numOfReviews)
-                    .build();
-
-            dto.addImage(url);
-            return dto;
-        }
-
-
-        public void reviewInit() {
+            /**
+             * Create & save Reviews
+             */
 
             List<ReviewDto> initialReviews = Arrays.asList(
                     // Reviews for Jipyeong Makgeolli
@@ -225,10 +187,49 @@ public class InitDb {
             }
 
         }
+        private MemberJoinRequestDto createMemberJoinRequestDto(String name, String password, Address address) {
+            return MemberJoinRequestDto.builder()
+                    .username(name)
+                    .password(password)
+                    .memberType(MemberType.USER)
+                    .address(address)
+                    .build();
 
+        }
+
+        private MemberJoinRequestDto createAdminJoinRequestDto(String name, String password, Address address) {
+            return MemberJoinRequestDto.builder()
+                    .username(name)
+                    .password(password)
+                    .memberType(MemberType.ADMIN)
+                    .address(address)
+                    .build();
+
+
+
+
+
+        }
+
+
+        private ProductDto createProduct(String name, int price, int stock,
+                                         String description, Category category, double ratings, int numOfReviews, String url) {
+            ProductDto dto = ProductDto.builder()
+                    .name(name)
+                    .price(price)
+                    .stockQuantity(stock)
+                    .description(description)
+                    .category(category)
+                    .ratings(ratings)
+                    .numOfReviews(numOfReviews)
+                    .build();
+
+            dto.addImage(url);
+            return dto;
+        }
 
         private ReviewDto createReview(Long productId, Long userId, String username,
-                                       int rating, String comment) {
+                                       double rating, String comment) {
             return ReviewDto.builder()
                     .productId(productId)
                     .userId(userId)

@@ -59,11 +59,11 @@ public class ItemService {
        item.reorderImage(imageId, newPosition);
     }
 
-    public Page<ProductDto> findItems(int page, int size, Range<Integer> range, String category, int ratings) {
+    public Page<ProductDto> findItems(int page, int size, Range<Integer> priceRange, String category, Range<Double> ratingsRange) {
         Map<String, Object> params = new HashMap<>();
         params.put("category", category);
-        params.put("ratings", ratings);
-        params.put("price", range);
+        params.put("ratings", ratingsRange);
+        params.put("price", priceRange);
         Pageable pageable = PageRequest.of(page, size);
         Specification<Item> spec = new SpecificationBuilderV2<Item>().buildSpecification(params);
 

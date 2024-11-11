@@ -32,7 +32,7 @@ public class Item {
     private int price;
     private String description;
     private int stockQuantity;
-    private int ratings;
+    private double ratings;
     private int numOfReviews;
 
     @Enumerated(EnumType.STRING)
@@ -49,7 +49,7 @@ public class Item {
     private List<Image> images = new ArrayList<>();
 
     @Builder
-    public Item(String name, int price, int stockQuantity, String description, int ratings, int numOfReviews, Category category){
+    public Item(String name, int price, int stockQuantity, String description, double ratings, int numOfReviews, Category category){
         this.name = name;
         this.price = price;
         this.stockQuantity = stockQuantity;
@@ -64,6 +64,7 @@ public class Item {
         this.price = price;
     }
 
+    // Stock management methods
     public void addStock(int quantity) {
         this.stockQuantity += quantity;
     }
@@ -77,10 +78,27 @@ public class Item {
         this.stockQuantity = restStock;
     }
 
+    // Review methods
+
+    public void updateReviewStats(){
+        this.numOfReviews = this.reviews.size();
+        this.ratings = this.reviews.stream()
+                .mapToDouble(Review::getRating)
+                .average()
+                .orElse(0.0);
+    }
 
     public void addReview(Review review) {
-        reviews.add(review);
+        if(!this.reviews.contains(review)){
+            this.reviews.add(review);
+            if(review.getItem() != null){
+                review.saveItem(this);
+            }
+            updateReviewStats();
+        }
     }
+
+
 
     public void saveCategory(Category category) {
         this.category = category;
@@ -101,7 +119,7 @@ public class Item {
         }
     }
 
-    // image management
+    // Image management
     public void addImage(String url){
         Image image = Image.builder()
                 .url(url)
@@ -123,8 +141,8 @@ public class Item {
     private void updateRatings() {
         this.numOfReviews = reviews.size();
         if(numOfReviews > 0) {
-            this.ratings = (int) Math.round(reviews.stream()
-                    .mapToInt(Review::getRating)
+            this.ratings = (double) Math.round(reviews.stream()
+                    .mapToDouble(Review::getRating)
                     .average()
                     .orElse(0.0));
         } else {
@@ -175,6 +193,8 @@ public class Item {
         }
     }
 
+    // DTO related Methods
+
     public void updateFromDto(ProductDto dto) {
         this.name = dto.getName();
         this.price = dto.getPrice();
@@ -196,31 +216,6 @@ public class Item {
                 id, name, category, images.size());
     }
 
-
-    public void saveItem(ProductDto form) {
-        this.name = form.getName();
-        this.price = form.getPrice();
-        this.stockQuantity = form.getStockQuantity();
-        this.description = form.getDescription();
-        this.ratings = form.getRatings();
-        this.numOfReviews = form.getNumOfReviews();
-        this.category = form.getCategory();
-
-        //clear existing images
-        this.images.clear();
-
-
-    }
-
-    public void updateItem(String name, int price, int stockQuantity, String description, int ratings, int numOfReviews, Category category){
-        this.name = name;
-        this.price = price;
-        this.stockQuantity = stockQuantity;
-        this.description = description;
-        this.ratings = ratings;
-        this.numOfReviews = numOfReviews;
-        this.category = category;
-    }
 
     public ProductDetailDto toProductDetailDto() {
         return ProductDetailDto.builder()

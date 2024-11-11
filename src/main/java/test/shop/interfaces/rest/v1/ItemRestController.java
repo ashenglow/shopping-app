@@ -53,11 +53,19 @@ public class ItemRestController {
             @RequestParam(name = "category", required = false) String category,
             @RequestParam(name = "minPrice", defaultValue = "0") Integer minPrice,
             @RequestParam(name = "maxPrice", defaultValue = "25000") Integer maxPrice,
-            @RequestParam(name = "ratings", defaultValue = "0") int ratings) {
+            @RequestParam(name = "ratings", defaultValue = "0") double ratings) {
 
         int size = 10;
-        Range<Integer> range = new Range<>(minPrice, maxPrice);
-        Page<ProductDto> itemsPage = itemService.findItems(page, size, range, category, ratings);
+        Range<Double> ratingsRange;
+        if(ratings ==0){
+            ratingsRange = new Range<>(0.0, 5.0); //show all ratings
+        }else{
+            ratingsRange = new Range<>(ratings, 5.0); // show ratings >= selected value
+        }
+
+
+        Range<Integer> priceRange = new Range<>(minPrice, maxPrice);
+        Page<ProductDto> itemsPage = itemService.findItems(page, size, priceRange, category, ratingsRange);
         //handling error
         if (itemsPage == null) {
             return ResponseEntity.notFound().build();
@@ -92,47 +100,6 @@ public class ItemRestController {
         return ResponseEntity.ok(new Result<>(dto));
     }
 
-    /**
-     * 상품 리뷰 작성
-     */
-    @PutMapping("/api/auth/v1/product/{itemId}/review")
-    @Operation(summary = "상품 리뷰 작성", description = "상품 리뷰를 작성합니다.")
-    public ResponseEntity<Boolean> createReview(HttpServletRequest request, @RequestBody ReviewDto form, @PathVariable("itemId") Long itemId) throws JsonProcessingException {
-        Long memberId = getMemberId(request);
-        form.setUserId(memberId);
-        String username = getUsername(request);
-        form.setUsername(username);
-        reviewService.saveReview(form);
-        return ResponseEntity.status(HttpStatus.CREATED).body(true);
-    }
-
-    /**
-     * 상품 리뷰 삭제
-     */
-    @DeleteMapping("/api/auth/v1/review/delete")
-    @Operation(summary = "상품 리뷰 삭제", description = "상품 리뷰를 삭제합니다.")
-    public ResponseEntity<Boolean> deleteReview(@RequestParam("id") Long reviewId) {
-        reviewService.deleteReview(reviewId);
-        //handling error
-        if (reviewId == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(true);
-    }
-
-    /**
-     * 전체 상품 리뷰 조회
-     */
-    @GetMapping("/api/public/v1/reviews")
-    @Operation(summary = "상품 리뷰 전체 조회", description = "상품 리뷰 전체를 가져옵니다.")
-    public ResponseEntity<Result<List<ReviewDto>>> listReviews(@RequestParam("id") Long itemId) {
-        List<ReviewDto> dtos = reviewService.findReviews(itemId);
-        //handling error
-        if (dtos == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(new Result<>(dtos));
-    }
 
 
     /**

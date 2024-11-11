@@ -51,7 +51,38 @@ public class SpecificationBuilderV2<T> {
             return builder.equal(path, value);
         } else if (value instanceof Range<?>) {
             Range<?> range = (Range<?>) value; //fixed to Number
-            return builder.between((Path<Comparable>) path, (Comparable)range.getLowerBound(), (Comparable) range.getUpperBound());
+            if(path.getJavaType().equals(Double.class)){
+                //handle ratings
+                Double lowerBound = (Double) range.getLowerBound();
+                if(lowerBound == 0.0){
+                    return null; //show all ratings
+                }
+                return builder.greaterThanOrEqualTo(path.as(Double.class), lowerBound);
+            }
+            else if(path.getJavaType().equals(Number.class)){
+                Integer lowerBound = ((Number) range.getLowerBound()).intValue();
+                Integer upperBound = ((Number) range.getUpperBound()).intValue();
+
+                if(lowerBound == 0 & upperBound == 0){
+                    return null;
+                }
+                if(upperBound >= 999999){
+                    return builder.greaterThanOrEqualTo(
+                            path.as(Integer.class),
+                            lowerBound
+                    );
+
+                }
+
+                return builder.between(
+                        path.as(Integer.class),
+                        lowerBound,
+                        upperBound
+                );
+
+            }
+
+                return builder.between((Path<Comparable>) path, (Comparable) range.getLowerBound(), (Comparable) range.getUpperBound());
 
 
         }

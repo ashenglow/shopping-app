@@ -15,7 +15,7 @@ public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private int rating;
+    private double rating;
     private String comment;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -27,20 +27,35 @@ public class Review {
     private Member member;
 
     @Builder
-    public Review(int rating, String comment) {
+    public Review(double rating, String comment) {
         this.rating = rating;
         this.comment = comment;
     }
 
     public void saveItem(Item item) {
+        // remove from old item if exists
+        if(this.item != null){
+            this.item.getReviews().remove(this);
+        }
         this.item = item;
-        item.addReview(this);
+        //add to new item's reviews if not already there
+        if(item != null && !item.getReviews().contains(this)){
+            item.getReviews().add(this);
+        }
     }
 
     public void saveMember(Member member) {
+        // remove from old member if exists
+        if(this.member != null){
+            this.member.getReviews().remove(this);
+        }
         this.member = member;
-        member.addReview(this);
+        // add to new member's reviews if not already there
+        if (member != null && !member.getReviews().contains(this)) {
+            member.getReviews().add(this);
+        }
     }
+
 
 
 public ReviewDto toReviewDto() {
