@@ -19,10 +19,7 @@ import test.shop.infrastructure.monitoring.service.AlertService;
 import test.shop.infrastructure.monitoring.service.MetricsAggregationService;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -30,17 +27,28 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MonitoringController {
     private final MetricsAggregationService metricService;
+    private final QueryPerformanceMonitor queryPerformanceMonitor;
     private final AlertService alertService;
 
     @GetMapping("/metrics")
     public MonitoringDashboardData getMetrics() {
         return metricService.aggregateMetrics();
     }
+
     @GetMapping("/metrics/{methodName}")
-    public MethodMetricsData getMethodMetrics(@PathVariable String methodName) {
+    public MethodMetricsData getMethodMetrics(@PathVariable String methodName){
         return metricService.getMethodMetrics(methodName);
     }
 
+    //for order-specific metrics, use method name pattern matching
+    @GetMapping("/metrics/orders")
+    public List<MethodMetricsData> getOrderMetrics() {
+        return queryPerformanceMonitor.getQueryStats().keySet().stream()
+                .filter(method -> method.toLowerCase().contains("order"))
+                .map(metricService::getMethodMetrics)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
     @GetMapping("/slow-queries/{methodName}")
     public SlowQueriesResponse getSlowQueries(
             @PathVariable String methodName

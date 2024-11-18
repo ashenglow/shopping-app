@@ -11,6 +11,7 @@ import org.hibernate.grammars.hql.HqlParser;
 import org.springframework.data.redis.core.PartialUpdate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import test.shop.application.dto.response.OrderDto;
 import test.shop.infrastructure.monitoring.model.alert.AlertThreshold;
 import test.shop.infrastructure.monitoring.model.metrics.QueryMetrics;
 import test.shop.infrastructure.monitoring.model.metrics.QueryStats;
@@ -41,50 +42,65 @@ public class QueryPerformanceMonitor {
         this.alertService = alertService;
     }
 
-    // Split into multiple pointcuts for better control
-    @Pointcut("within(test.shop.application.service..*)")
-    public void applicationService() {}
 
-    @Pointcut("within(test.shop.application.service.item.*)")
-    public void itemService() {}
 
-    @Pointcut("within(test.shop.application.service.order.*)")
-    public void orderService() {}
-
-    @Pointcut("within(test.shop.domain.repository.*)")
-    public void domainRepository() {}
-
-    @Pointcut("@annotation(org.springframework.transaction.annotation.Transactional)")
-    public void transactionalMethod() {}
-    @Around("applicationService() || itemService() || orderService() || domainRepository() || transactionalMethod()")
-    public Object monitorQuery(ProceedingJoinPoint joinPoint) throws Throwable {
+    @Around("execution(* test.shop.application.service.order.OrderService.*(..))" +
+            "|| execution(* test.shop.domain.repository.OrderRepository.*(..))")
+    public Object monitorOrderFlow(ProceedingJoinPoint joinPoint) throws Throwable {
         String methodKey = extractMethodKey(joinPoint);
-        Object[] args = joinPoint.getArgs();
-
-        // Log method entry for debugging
-        log.debug("Entering method: {} with args: {}", methodKey, Arrays.toString(args));
-
         long startTime = System.currentTimeMillis();
         boolean isError = false;
 
-        try {
-            Object result = joinPoint.proceed();
-            long duration = System.currentTimeMillis() - startTime;
+        //add context tracking
+        Map<String, Object> context = new HashMap<>();
+        context.put("operation", methodKey);
 
-            // Log successful execution
-            log.debug("Completed method: {} in {}ms", methodKey, duration);
-
-            return result;
-        } catch (Exception e){
-            isError = true;
-            log.error("Error in monitored method: {} - {}", methodKey, e.getMessage());
-            throw e;
-        }finally {
-            long executionTime = System.currentTimeMillis() - startTime;
-            processQueryExecution(methodKey, executionTime, isError);
+        //extract orderId if available
+        Long orderId = extractOrderId(joinPoint.getArgs());
+        if(orderId != null) {
+            context.put("orderId", orderId);
         }
+
+       try {
+           return joinPoint.proceed();
+       }catch (Exception e){
+           isError = true;
+           throw e;
+       }finally {
+           long executionTime = System.currentTimeMillis() - startTime;
+           processOrderExecution(methodKey, executionTime, isError, context);
+       }
     }
 
+    private void processOrderExecution(String methodKey, long executionTime, boolean isError, Map<String, Object> context) {
+        QueryStats stats = queryStats.computeIfAbsent(methodKey, k -> new QueryStats(methodKey));
+        stats.addOrderExecutionDetail(executionTime, context);
+    }
+
+    private Long extractOrderId(Object[] args) {
+        if (args == null || args.length == 0) {
+            return null;
+        }
+
+        // For order creation: OrderService.order(Long memberId, List<OrderRequestDto> dtos)
+        if (args[0] instanceof Long && args.length > 1 && args[1] instanceof List) {
+            return null; // New order, no ID yet
+        }
+
+        // For order lookup methods that take orderId directly
+        if (args[0] instanceof Long) {
+            return (Long) args[0];
+        }
+
+        // For methods that might have orderId in a DTO
+        for (Object arg : args) {
+            if (arg instanceof OrderDto) {
+                return ((OrderDto) arg).getOrderId();
+            }
+        }
+
+        return null;
+    }
     // Improved method key generation for better identification
     private String getMethodSignature(ProceedingJoinPoint joinPoint) {
         String className = joinPoint.getTarget().getClass().getSimpleName();
@@ -110,36 +126,6 @@ public class QueryPerformanceMonitor {
         }
 
         return className + "." + signature.getName();
-    }
-
-    private void processQueryExecution(String methodKey, long executionTime, boolean isError) {
-        QueryStats stats = queryStats.computeIfAbsent(
-                methodKey,
-                k -> new QueryStats(methodKey)
-        );
-
-        // Use your existing AlertThreshold constructor
-        AlertThreshold threshold = getThresholdForMethod(methodKey);
-
-        stats.addQuery(executionTime, threshold);
-
-        if (executionTime > threshold.getSlowQueryThreshold()) {
-            log.warn("Slow execution detected - Method: {}, Time: {}ms",
-                    methodKey, executionTime);
-        }
-
-        QueryExecutionContext context = new QueryExecutionContext(
-                methodKey,
-                executionTime,
-                isError
-        );
-
-        queryHistory.offer(context);
-        while (queryHistory.size() > MAX_HISTORY) {
-            queryHistory.poll();
-        }
-
-        alertService.checkThresholds(methodKey, executionTime, stats);
     }
 
     private AlertThreshold getThresholdForMethod(String methodKey) {

@@ -13,7 +13,9 @@ import test.shop.infrastructure.monitoring.model.dashboard.stats.MethodStats;
 import test.shop.infrastructure.monitoring.model.dashboard.summary.PerformanceSummary;
 import test.shop.infrastructure.monitoring.model.dashboard.summary.SlowQuerySummary;
 import test.shop.infrastructure.monitoring.model.dashboard.timeseris.TimeSeriesPoint;
+import test.shop.infrastructure.monitoring.model.metrics.OperationMetric;
 import test.shop.infrastructure.monitoring.model.metrics.QueryStats;
+import test.shop.infrastructure.monitoring.model.query.QueryExecutionContext;
 import test.shop.infrastructure.monitoring.model.query.SlowQueryInfo;
 
 import java.time.LocalDateTime;
@@ -43,6 +45,9 @@ public class MetricsAggregationService {
         if(stats == null) {
             return null;
         }
+
+        List<OperationMetric> operationBreakdown = buildOperationBreakdown(stats);
+
         return MethodMetricsData.builder()
                 .methodName(methodName)
                 .averageTime(stats.getAverageTime())
@@ -50,7 +55,35 @@ public class MetricsAggregationService {
                 .slowQueries(stats.getSlowQueries().get())
                 .recentSlowQueries(stats.getRecentSlowQueries())
                 .timeSeriesData(createMethodTimeSeriesData(stats))
+                .operationBreakdown(operationBreakdown)
                 .build();
+    }
+
+    private List<OperationMetric> buildOperationBreakdown(QueryStats stats) {
+        Map<String, List<QueryExecutionContext>> executionByOperation = stats.getQueryHistory().stream()
+                .collect(Collectors.groupingBy(
+                        context -> context.getMetadata().getOrDefault("operation", "unknown").toString()
+                ));
+    return executionByOperation.entrySet().stream()
+            .map(entry -> {
+                List<QueryExecutionContext> executions = entry.getValue();
+                double avgTime = executions.stream()
+                        .mapToLong(QueryExecutionContext::getExecutionTime)
+                        .average()
+                        .orElse(0.0);
+                return OperationMetric.builder()
+                        .operationName(entry.getKey())
+                        .averageExecutionTime(avgTime)
+                        .executionCount(executions.size())
+                        .recentExecutions(executions.subList(
+                                Math.max(0, executions.size() - 10),
+                                executions.size()
+                        ))
+                        .build();
+
+            })
+            .collect(Collectors.toList());
+
     }
     public List<SlowQueryInfo> getMethodSlowQueries(String methodName) {
         QueryStats stats = monitor.getQueryStats().get(methodName);
