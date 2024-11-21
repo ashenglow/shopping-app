@@ -43,8 +43,15 @@ public class MetricsAggregationService {
     public MethodMetricsData getMethodMetrics(String methodName) {
         QueryStats stats = monitor.getQueryStats().get(methodName);
         if(stats == null) {
+            log.debug("No stats found for method: {}", methodName);
             return null;
         }
+
+        log.info("Stats for {}: totalQueries={}, avgTime={}, slowQueries={}",
+                methodName,
+                stats.getTotalQueries().get(),
+                stats.getAverageTime(),
+                stats.getSlowQueries().get());
 
         List<OperationMetric> operationBreakdown = buildOperationBreakdown(stats);
 

@@ -1,6 +1,7 @@
 package test.shop.infrastructure.monitoring.model.metrics;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import test.shop.infrastructure.monitoring.model.alert.AlertThreshold;
 import test.shop.infrastructure.monitoring.model.dashboard.timeseris.TimeSeriesPoint;
 import test.shop.infrastructure.monitoring.model.query.QueryExecutionContext;
@@ -15,6 +16,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Data
+@Slf4j
 public class QueryStats {
     private final String methodName;
     private final AtomicLong totalQueries  = new AtomicLong(0);
@@ -54,11 +56,6 @@ public class QueryStats {
     public void addQuery(QueryExecutionContext context){
         totalQueries.incrementAndGet();
         totalTime.addAndGet(context.getExecutionTime());
-        queryHistory.offer(context);
-
-        while(queryHistory.size() > MAX_HISTORY_SIZE){
-            queryHistory.poll();
-        }
 
         timeSeriesData.offer(new TimeSeriesPoint(
                 LocalDateTime.now(),
@@ -66,9 +63,21 @@ public class QueryStats {
                 this.methodName
         ));
 
+        queryHistory.offer(context);
+
         while (timeSeriesData.size() > MAX_HISTORY_SIZE){
             timeSeriesData.poll();
         }
+
+        while(queryHistory.size() > MAX_HISTORY_SIZE){
+            queryHistory.poll();
+        }
+
+        log.info("Added query stats for {}: time={}ms, total={}, avg={}ms",
+                methodName,
+                context.getExecutionTime(),
+                totalQueries.get(),
+                getAverageTime());
 
     }
 
