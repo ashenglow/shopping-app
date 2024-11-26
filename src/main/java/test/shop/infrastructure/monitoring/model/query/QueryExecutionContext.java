@@ -25,6 +25,7 @@ public class QueryExecutionContext {
         this.metadata = new HashMap<>();
     }
 
+
     public void addMetadata(String key, Object value) {
         this.metadata.put(key, value);
     }

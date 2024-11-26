@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import test.shop.infrastructure.monitoring.aspect.QueryPerformanceMonitor;
+import test.shop.infrastructure.monitoring.model.alert.Alert;
 import test.shop.infrastructure.monitoring.model.dashboard.MonitoringDashboardData;
 import test.shop.infrastructure.monitoring.model.dashboard.response.MethodMetricsData;
 import test.shop.infrastructure.monitoring.model.dashboard.response.SlowQueriesResponse;
@@ -45,98 +46,155 @@ public class MonitoringController {
     public MethodMetricsData getMethodMetrics(@PathVariable String methodName){
         return metricService.getMethodMetrics(methodName);
     }
+    @GetMapping("/metrics/items")
+    public List<MethodMetricsData> getItemMetrics() {
+        Set<String> itemPatterns = new HashSet<>(Arrays.asList(
+                "item", "product", "inventory"
+        ));
+
+        return getMetricsForPatterns(itemPatterns);
+    }
 
     //for order-specific metrics, use method name pattern matching
+//    @GetMapping("/metrics/orders")
+//    public List<MethodMetricsData> getOrderMetrics() {
+//
+//        log.info("Fetching order metrics...");
+//        Set<String> orderRelatedPatterns = new HashSet<>(Arrays.asList(
+//                "order",         // Direct order methods
+//                "delivery",      // Delivery creation/updates
+//                "member",        // Member validation
+//                "item",          // Item retrieval for orders
+//                "createorder",   // Order creation method
+//                "addorderitem",  // Order item addition
+//                "createorderitem" // Order item creation
+//        ));
+//        List<MethodMetricsData> orderMetrics = queryPerformanceMonitor.getQueryStats().keySet().stream()
+//                .filter(method -> orderRelatedPatterns.stream()
+//                        .anyMatch(pattern -> method.toLowerCase().contains(pattern.toLowerCase())))
+//                .map(methodName -> {
+//                    MethodMetricsData metrics = metricService.getMethodMetrics(methodName);
+//                    if (metrics != null) {
+//                        log.info("Found metrics for {}: totalQueries={}, avgTime={}ms",
+//                                methodName,
+//                                metrics.getTotalQueries(),
+//                                metrics.getAverageTime());
+//                    }
+//                    return metrics;
+//                })
+//                .filter(Objects::nonNull)
+//                .collect(Collectors.toList());
+//
+//        log.info("Returning {} order-related metrics", orderMetrics.size());
+//        return orderMetrics;
+//    }
     @GetMapping("/metrics/orders")
     public List<MethodMetricsData> getOrderMetrics() {
-
-        log.info("Fetching order metrics...");
-        Set<String> orderRelatedPatterns = new HashSet<>(Arrays.asList(
-                "order",         // Direct order methods
-                "delivery",      // Delivery creation/updates
-                "member",        // Member validation
-                "item",          // Item retrieval for orders
-                "createorder",   // Order creation method
-                "addorderitem",  // Order item addition
-                "createorderitem" // Order item creation
+        Set<String> orderPatterns = new HashSet<>(Arrays.asList(
+                "order", "delivery", "payment"
         ));
-        List<MethodMetricsData> orderMetrics = queryPerformanceMonitor.getQueryStats().keySet().stream()
-                .filter(method -> orderRelatedPatterns.stream()
-                        .anyMatch(pattern -> method.toLowerCase().contains(pattern.toLowerCase())))
+        return getMetricsForPatterns(orderPatterns);
+    }
+//    @GetMapping("/slow-queries/{methodName}")
+//    public SlowQueriesResponse getSlowQueries(
+//            @PathVariable String methodName
+//    ) {
+//        return SlowQueriesResponse.builder()
+//                .methodName(methodName)
+//                .slowQueries(metricService.getMethodSlowQueries(methodName))
+//                .summary(metricService.createSlowQuerySummary(methodName))
+//                .build();
+//
+//    }
+//    @PostMapping("/thresholds/{methodName}")
+//    public void setThreshold(@PathVariable String methodName,
+//                             @RequestParam long slowQueryThreshold,
+//                             @RequestParam long avgTimeThreshold) {
+//        alertService.setThresholds(methodName, slowQueryThreshold, avgTimeThreshold);
+//    }
+
+    private List<MethodMetricsData> getMetricsForPatterns(Set<String> patterns) {
+        return queryPerformanceMonitor.getQueryStats().keySet().stream()
+                .filter(method -> patterns.stream()
+                        .anyMatch((pattern) -> method.toLowerCase().contains(pattern)))
                 .map(methodName -> {
                     MethodMetricsData metrics = metricService.getMethodMetrics(methodName);
                     if (metrics != null) {
-                        log.info("Found metrics for {}: totalQueries={}, avgTime={}ms",
-                                methodName,
-                                metrics.getTotalQueries(),
-                                metrics.getAverageTime());
+                        log.debug("Found metrics for {}: queries{}, avgTime={}ms",
+                                methodName, metrics.getTotalQueries(), metrics.getAverageTime());
                     }
                     return metrics;
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-
-        log.info("Returning {} order-related metrics", orderMetrics.size());
-        return orderMetrics;
     }
-    @GetMapping("/slow-queries/{methodName}")
-    public SlowQueriesResponse getSlowQueries(
-            @PathVariable String methodName
-    ) {
-        return SlowQueriesResponse.builder()
-                .methodName(methodName)
-                .slowQueries(metricService.getMethodSlowQueries(methodName))
-                .summary(metricService.createSlowQuerySummary(methodName))
-                .build();
+//    @GetMapping("/metrics/orders/flow")
+//    public List<OrderFlowMetrics> getOrderFlowMetrics() {
+//        return orderFlowMonitor.getRecentExecutions().stream()
+//                .map(metrics -> OrderFlowMetrics.builder()
+//                        .orderId(metrics.getOrderId())
+//                        .totalTime(metrics.getTotalExecutionTime())
+//                        .steps(convertStepTimings(metrics.getStepTimings()))
+//                        .queryBreakdown(createQueryBreakdown(metrics.getQueryTimings()))
+//                        .timestamp(metrics.getTimestamp())
+//                        .build())
+//                .collect(Collectors.toList());
+//    }
 
-    }
-    @PostMapping("/thresholds/{methodName}")
-    public void setThreshold(@PathVariable String methodName,
-                             @RequestParam long slowQueryThreshold,
-                             @RequestParam long avgTimeThreshold) {
-        alertService.setThresholds(methodName, slowQueryThreshold, avgTimeThreshold);
+    @GetMapping("/alerts")
+    public Map<String, List<Alert>> getAlerts(){
+        return  alertService.getRecentAlerts().stream()
+                .collect(Collectors.groupingBy(Alert::getMethodName));
     }
 
-    @GetMapping("/metrics/orders/flow")
-    public List<OrderFlowMetrics> getOrderFlowMetrics() {
-        return orderFlowMonitor.getRecentExecutions().stream()
-                .map(metrics -> OrderFlowMetrics.builder()
-                        .orderId(metrics.getOrderId())
-                        .totalTime(metrics.getTotalExecutionTime())
-                        .steps(convertStepTimings(metrics.getStepTimings()))
-                        .queryBreakdown(createQueryBreakdown(metrics.getQueryTimings()))
-                        .timestamp(metrics.getTimestamp())
-                        .build())
-                .collect(Collectors.toList());
-    }
-    private Map<String, StepMetrics> convertStepTimings(Map<String, Long> stepTimings) {
-        long totalTime = stepTimings.values().stream().mapToLong(Long::valueOf).sum();
-
-        return stepTimings.entrySet().stream()
+    @GetMapping("/optimization-suggestions")
+    public Map<String, List<String>> getOptimizationSuggestions(){
+        return queryPerformanceMonitor.getQueryStats().entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
-                        entry -> StepMetrics.builder()
-                                .name(entry.getKey())
-                                .duration(entry.getValue())
-                                .queries(getQueriesForStep(entry.getKey()))
-                                .percentageOfTotal(calculatePercentage(entry.getValue(), totalTime))
-                                .build()
+                        e -> analyzeAndGetSuggestions(e.getValue())
                 ));
     }
 
-    private List<QueryBreakdown> createQueryBreakdown(Map<String, List<Long>> queryTimings) {
-        return queryTimings.entrySet().stream()
-                .map(entry -> {
-                    List<Long> timings = entry.getValue();
-                    return QueryBreakdown.builder()
-                            .queryType(extractQueryType(entry.getKey()))
-                            .table(extractTable(entry.getKey()))
-                            .avgDuration(calculateAverage(timings))
-                            .count(timings.size())
-                            .build();
-                })
-                .collect(Collectors.toList());
+    private List<String> analyzeAndGetSuggestions(QueryStats stats){
+        List<String> suggestions = new ArrayList<>();
+
+        if(stats.getAverageTime() > 500){
+            suggestions.add("Consider adding relevant indexes");
+        }
+        if(stats.getSlowQueries().get() > 10){
+            suggestions.add("High number of slow queries detected - review query patterns");
+        }
+        return suggestions;
     }
+//    private Map<String, StepMetrics> convertStepTimings(Map<String, Long> stepTimings) {
+//        long totalTime = stepTimings.values().stream().mapToLong(Long::valueOf).sum();
+//
+//        return stepTimings.entrySet().stream()
+//                .collect(Collectors.toMap(
+//                        Map.Entry::getKey,
+//                        entry -> StepMetrics.builder()
+//                                .name(entry.getKey())
+//                                .duration(entry.getValue())
+//                                .queries(getQueriesForStep(entry.getKey()))
+//                                .percentageOfTotal(calculatePercentage(entry.getValue(), totalTime))
+//                                .build()
+//                ));
+//    }
+//
+//    private List<QueryBreakdown> createQueryBreakdown(Map<String, List<Long>> queryTimings) {
+//        return queryTimings.entrySet().stream()
+//                .map(entry -> {
+//                    List<Long> timings = entry.getValue();
+//                    return QueryBreakdown.builder()
+//                            .queryType(extractQueryType(entry.getKey()))
+//                            .table(extractTable(entry.getKey()))
+//                            .avgDuration(calculateAverage(timings))
+//                            .count(timings.size())
+//                            .build();
+//                })
+//                .collect(Collectors.toList());
+//    }
 
     private List<String> getQueriesForStep(String stepName) {
         // This method would need access to query information from your monitoring system
