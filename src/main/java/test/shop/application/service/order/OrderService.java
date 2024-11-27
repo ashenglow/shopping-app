@@ -2,6 +2,7 @@ package test.shop.application.service.order;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,7 @@ import test.shop.domain.model.order.OrderItem;
 import test.shop.domain.repository.ItemRepository;
 import test.shop.domain.repository.MemberRepository;
 import test.shop.domain.repository.OrderRepository;
+import test.shop.infrastructure.monitoring.aspect.QueryPerformanceMonitor;
 import test.shop.infrastructure.persistence.jpa.query.OrderQueryRepository;
 import test.shop.application.dto.response.OrderDto;
 import test.shop.application.dto.request.OrderRequestDto;
@@ -30,31 +32,54 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Slf4j
 public class OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderQueryRepository orderQueryRepository;
     private final MemberRepository memberRepository;
     private final ItemRepository itemRepository;
+    private final QueryPerformanceMonitor monitor;
 
     /**
      * 주문
      */
     @Transactional
     public Long order(Long memberId, List<OrderRequestDto> dtos) {
+        long startTime = System.currentTimeMillis();
+        monitor.setCurrentStep("memberValidation");
 
-        //엔티티 조회
-        Member member = memberRepository.findMemberById(memberId)
-                .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
-        //배송정보 생성
-        Delivery delivery = createDelivery(member);
-        //주문상품 생성
-        List<OrderItem> orderItems = createOrderItems(dtos);
-        //주문 생성
-        Order order = Order.createOrder(member, delivery, orderItems);
-        //주문 저장
-        orderRepository.save(order);
-        return order.getId();
+        try {
+            // Member validation
+            Member member = memberRepository.findMemberById(memberId)
+                    .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
+
+            // Delivery creation
+            monitor.setCurrentStep("deliveryCreation");
+            Delivery delivery = createDelivery(member);
+
+            // Order items
+            monitor.setCurrentStep("itemsProcessing");
+            List<OrderItem> orderItems = createOrderItems(dtos);
+
+            // Order creation and save
+            monitor.setCurrentStep("orderSave");
+            Order order = Order.createOrder(member, delivery, orderItems);
+            Order savedOrder = orderRepository.save(order);
+
+            long totalTime = System.currentTimeMillis() - startTime;
+            log.info("Order process completed in {}ms for member: {}", totalTime, memberId);
+
+            return savedOrder.getId();
+        } finally {
+            monitor.clearCurrentStep();
+        }
+    }
+    private void logOrderFlowTimings(Map<String, Long> stepTimings, long totalTime) {
+        log.info("Order Flow Execution Times:");
+        log.info("Total Execution Time: {}ms", totalTime);
+        stepTimings.forEach((step, time) ->
+                log.info("  {} : {}ms", step, time));
     }
 
     public OrderDto findOrderById(Long orderId) {
