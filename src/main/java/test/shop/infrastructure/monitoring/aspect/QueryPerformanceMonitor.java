@@ -11,6 +11,7 @@ import org.hibernate.grammars.hql.HqlParser;
 import org.springframework.data.redis.core.PartialUpdate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import test.shop.application.dto.response.OrderDto;
 import test.shop.infrastructure.monitoring.model.alert.AlertThreshold;
 import test.shop.infrastructure.monitoring.model.metrics.QueryMetrics;
 import test.shop.infrastructure.monitoring.model.metrics.QueryStats;
@@ -31,9 +32,10 @@ import static org.hibernate.grammars.hql.HqlParser.*;
 @Component
 @Slf4j
 public class QueryPerformanceMonitor {
-
     private final Map<String, QueryStats> queryStats = new ConcurrentHashMap<>();
     private final Queue<QueryExecutionContext> queryHistory = new ConcurrentLinkedQueue<>();
+    private final Map<String, List<String>> stepQueries = new ConcurrentHashMap<>();
+    private final ThreadLocal<String> currentStep = new ThreadLocal<>();
     private final AlertService alertService;
     private static final int MAX_HISTORY = 1000;
 
@@ -41,55 +43,71 @@ public class QueryPerformanceMonitor {
         this.alertService = alertService;
     }
 
-    // Split into multiple pointcuts for better control
-    @Pointcut("within(test.shop.application.service..*)")
-    public void applicationService() {}
-
-    @Pointcut("within(test.shop.application.service.item.*)")
-    public void itemService() {}
-
-    @Pointcut("within(test.shop.application.service.order.*)")
-    public void orderService() {}
-
-    @Pointcut("within(test.shop.domain.repository.*)")
-    public void domainRepository() {}
-
-    @Pointcut("@annotation(org.springframework.transaction.annotation.Transactional)")
-    public void transactionalMethod() {}
-    @Around("applicationService() || itemService() || orderService() || domainRepository() || transactionalMethod()")
+    @Around("execution(* test.shop.application.service.order.OrderService.*(..)) || " +
+            "execution(* test.shop.domain.repository.OrderRepository.*(..)) || " +
+            "execution(* test.shop.application.service.item.ItemService.*(..)) || " +
+            "execution(* test.shop.domain.repository.ItemRepository.*(..)) || " +
+            "execution(* test.shop.application.service.member.MemberService.*(..)) || " +
+            "execution(* test.shop.domain.repository.MemberRepository.*(..)) || " +
+            "execution(* test.shop.domain.model.delivery.Delivery.*(..)) || " +
+            "execution(* test.shop.domain.model.order.Order.createOrder(..)) || " +
+            "execution(* test.shop.domain.model.order.OrderItem.createOrderItem(..)) || " +
+            "execution(* test.shop.domain.model.order.Order.addOrderItem(..))")
     public Object monitorQuery(ProceedingJoinPoint joinPoint) throws Throwable {
         String methodKey = extractMethodKey(joinPoint);
-        Object[] args = joinPoint.getArgs();
-
-        // Log method entry for debugging
-        log.debug("Entering method: {} with args: {}", methodKey, Arrays.toString(args));
-
         long startTime = System.currentTimeMillis();
         boolean isError = false;
 
         try {
             Object result = joinPoint.proceed();
-            long duration = System.currentTimeMillis() - startTime;
 
-            // Log successful execution
-            log.debug("Completed method: {} in {}ms", methodKey, duration);
+            // Only record step query if we're in a step
+            String step = currentStep.get();
+            if (step != null) {
+                stepQueries.computeIfAbsent(step, k -> new ArrayList<>())
+                        .add(methodKey);
+            }
 
             return result;
-        } catch (Exception e){
+        } catch (Exception e) {
             isError = true;
-            log.error("Error in monitored method: {} - {}", methodKey, e.getMessage());
             throw e;
-        }finally {
+        } finally {
             long executionTime = System.currentTimeMillis() - startTime;
-            processQueryExecution(methodKey, executionTime, isError);
+            QueryExecutionContext context = new QueryExecutionContext(methodKey, executionTime, isError);
+
+            QueryStats stats = queryStats.computeIfAbsent(methodKey, k -> new QueryStats(methodKey));
+            stats.addQuery(context);
+
+            log.info("Recorded method execution: {} took {}ms", methodKey, executionTime);
         }
     }
 
-    // Improved method key generation for better identification
-    private String getMethodSignature(ProceedingJoinPoint joinPoint) {
-        String className = joinPoint.getTarget().getClass().getSimpleName();
-        String methodName = joinPoint.getSignature().getName();
-        return className + "." + methodName;
+    // Step tracking methods
+    public void setCurrentStep(String step) {
+        if (step != null) {
+            currentStep.set(step);
+            log.debug("Set current step to: {}", step);
+        }
+    }
+
+    public String getCurrentStep() {
+        return currentStep.get();
+    }
+
+    public void clearCurrentStep() {
+        currentStep.remove();
+    }
+
+    // Query tracking methods
+    public List<String> getQueriesForStep(String stepName) {
+        return stepName != null ?
+                stepQueries.getOrDefault(stepName, new ArrayList<>()) :
+                new ArrayList<>();
+    }
+
+    public Map<String, List<String>> getAllStepQueries() {
+        return new HashMap<>(stepQueries);
     }
 
     private String extractMethodKey(ProceedingJoinPoint joinPoint) {
@@ -97,7 +115,6 @@ public class QueryPerformanceMonitor {
         Class<?> targetClass = joinPoint.getTarget().getClass();
         String className = targetClass.getSimpleName();
 
-        // Handle proxy classes
         if (className.contains("$")) {
             Class<?>[] interfaces = targetClass.getInterfaces();
             if (interfaces.length > 0 && !interfaces[0].getSimpleName().contains("$")) {
@@ -112,76 +129,18 @@ public class QueryPerformanceMonitor {
         return className + "." + signature.getName();
     }
 
-    private void processQueryExecution(String methodKey, long executionTime, boolean isError) {
-        QueryStats stats = queryStats.computeIfAbsent(
-                methodKey,
-                k -> new QueryStats(methodKey)
-        );
-
-        // Use your existing AlertThreshold constructor
-        AlertThreshold threshold = getThresholdForMethod(methodKey);
-
-        stats.addQuery(executionTime, threshold);
-
-        if (executionTime > threshold.getSlowQueryThreshold()) {
-            log.warn("Slow execution detected - Method: {}, Time: {}ms",
-                    methodKey, executionTime);
-        }
-
-        QueryExecutionContext context = new QueryExecutionContext(
-                methodKey,
-                executionTime,
-                isError
-        );
-
-        queryHistory.offer(context);
-        while (queryHistory.size() > MAX_HISTORY) {
-            queryHistory.poll();
-        }
-
-        alertService.checkThresholds(methodKey, executionTime, stats);
-    }
-
-    private AlertThreshold getThresholdForMethod(String methodKey) {
-        // Default thresholds
-        long slowQueryThreshold = 1000;
-        long avgTimeThreshold = 500;
-
-        // Specific thresholds for different types of methods
-        if (methodKey.startsWith("ItemService")) {
-            slowQueryThreshold = 500;
-            avgTimeThreshold = 200;
-        } else if (methodKey.startsWith("OrderService")) {
-            slowQueryThreshold = 1000;
-            avgTimeThreshold = 500;
-        } else if (methodKey.endsWith("Repository")) {
-            slowQueryThreshold = 300;
-            avgTimeThreshold = 100;
-        }
-
-        return new AlertThreshold(slowQueryThreshold, avgTimeThreshold);
+    public Map<String, QueryStats> getQueryStats() {
+        return new HashMap<>(queryStats);
     }
 
     @PostConstruct
     public void initializeMonitoring() {
-        // Service methods
+        // Set default thresholds
         alertService.setThresholds("ItemService.findItems", 500, 200);
         alertService.setThresholds("ItemService.getItemDetail", 300, 100);
-        alertService.setThresholds("ItemService.saveItem", 400, 200);
-
         alertService.setThresholds("OrderService.order", 1000, 500);
-        alertService.setThresholds("OrderService.findOrdersByMemberId", 500, 200);
-
-        // Repository methods
-        alertService.setThresholds("ItemRepository.findAll", 300, 100);
         alertService.setThresholds("OrderRepository.findOrdersByMemberId", 500, 200);
 
-        log.info("Performance monitoring initialized with {} thresholds",
-                queryStats.size());
+        log.info("Performance monitoring initialized");
     }
-
-    public Map<String, QueryStats> getQueryStats(){
-        return new HashMap<>(queryStats);
-    }
-
 }

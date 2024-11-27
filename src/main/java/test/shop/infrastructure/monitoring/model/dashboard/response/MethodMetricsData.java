@@ -3,6 +3,7 @@ package test.shop.infrastructure.monitoring.model.dashboard.response;
 import lombok.Builder;
 import lombok.Data;
 import test.shop.infrastructure.monitoring.model.dashboard.timeseris.TimeSeriesPoint;
+import test.shop.infrastructure.monitoring.model.metrics.OperationMetric;
 import test.shop.infrastructure.monitoring.model.query.SlowQueryInfo;
 
 import java.util.List;
@@ -16,4 +17,6 @@ public class MethodMetricsData {
     private long slowQueries;
     private List<SlowQueryInfo> recentSlowQueries;
     private List<TimeSeriesPoint> timeSeriesData;
+    //add fields for operation breakdown
+    private List<OperationMetric> operationBreakdown;
 }
