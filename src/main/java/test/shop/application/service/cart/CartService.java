@@ -100,6 +100,13 @@ public class CartService {
         return removedItemIds;
     }
 
+    @Transactional
+    public void clearCart(Long memberId) {
+        Cart cart = getCartByMemberId(memberId);
+        cart.getCartItems().clear();
+        cartRepository.save(cart);
+        log.info("[CartService] Cleared all items from cart for=memberId={}", memberId);
+    }
 
 
 }

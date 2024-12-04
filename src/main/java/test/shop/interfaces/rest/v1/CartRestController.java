@@ -59,5 +59,12 @@ public class CartRestController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/api/auth/v1/cart/clear")
+    @Operation(summary = "장바구니 비우기", description = "장바구니의 모든 상품을 삭제합니다.")
+    public ResponseEntity<String> clearCart(HttpServletRequest request) {
+       Long memberId = authService.getMemberIdFromAccessToken(request);
+       cartService.clearCart(memberId);
+       return ResponseEntity.ok("Clear cart success");
+    }
 
 }
