@@ -5,6 +5,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,7 @@ import java.util.Base64;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -93,20 +95,29 @@ public class AuthService {
         return member.toUserModelDto(accessToken);
     }
 
-    public Long getMemberIdFromAccessToken(HttpServletRequest request) throws JsonProcessingException {
-        String accessToken = tokenUtil.extractAccessToken(request);
-        if (accessToken == null) {
-            throw new CustomTokenException("Access token not found");
-        }
-        return tokenUtil.getMemberId(accessToken);
+    public Long getMemberIdFromAccessToken(HttpServletRequest request){
+
+            String accessToken = tokenUtil.extractAccessToken(request);
+            if (accessToken == null) {
+                throw new CustomTokenException("Access token not found");
+            }
+            return tokenUtil.getMemberId(accessToken);
+
+
     }
 
-    public String getUsernameFromAccessToken(HttpServletRequest request) throws JsonProcessingException {
-        String accessToken = tokenUtil.extractAccessToken(request);
-        if (accessToken == null) {
-            throw new CustomTokenException("Access token not found");
+    public String getUsernameFromAccessToken(HttpServletRequest request) {
+        try {
+            String accessToken = tokenUtil.extractAccessToken(request);
+            if (accessToken == null) {
+                throw new CustomTokenException("Access token not found");
+            }
+            return tokenUtil.getUsername(accessToken);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to process token", e);
+            throw new CustomTokenException("Invalid token format");
         }
-        return tokenUtil.getUsername(accessToken);
+
     }
 
     public String createRefreshToken(String username) {
