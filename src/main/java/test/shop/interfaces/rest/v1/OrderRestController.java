@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -25,11 +26,11 @@ public class OrderRestController {
     private final OrderService orderService;
     private final AuthService authService;
 
-    @PostMapping("/api/auth/v1/order/new/{memberId}")
+    @PostMapping("/api/auth/v1/order/new")
     @Operation(summary = "주문 생성", description = "주문을 생성합니다.")
-    public ResponseEntity<Long> order(@PathVariable("memberId") String memberId, @RequestBody List<OrderRequestDto> dtos) {
-        Long parsedId = Long.parseLong(memberId);
-        Long orderId = orderService.order(parsedId, dtos);
+    public ResponseEntity<Long> order(@RequestBody List<OrderRequestDto> dtos, HttpServletRequest request) {
+        Long memberId = authService.getMemberIdFromAccessToken(request);
+        Long orderId = orderService.order(memberId, dtos);
         return ResponseEntity.ok(orderId);
     }
 
@@ -43,8 +44,8 @@ public class OrderRestController {
 
     @GetMapping("/api/auth/v1/orders/me")
     @Operation(summary = "주문 목록 조회", description = "회원 주문 목록을 가져옵니다.")
-    public Page<OrderDto> myOrders(HttpServletRequest request, @RequestParam(value = "offset", defaultValue = "0") int offset, @RequestParam(value = "limit", defaultValue = "100") int limit) throws JsonProcessingException {
-        Long memberId = getMemberId(request);
+    public Page<OrderDto> myOrders(HttpServletRequest request, @RequestParam(value = "offset", defaultValue = "0") int offset, @RequestParam(value = "limit", defaultValue = "100") int limit) {
+        Long memberId = authService.getMemberIdFromAccessToken(request);
         return orderService.findOrdersByMemberId(memberId, offset, limit);
 
     }
@@ -54,9 +55,6 @@ public class OrderRestController {
     public ResponseEntity<Boolean> cancelOrder(@PathVariable("orderId") Long orderId) {
         orderService.cancelOrder(orderId);
         return ResponseEntity.ok(true);
-    }
-     private Long getMemberId(HttpServletRequest request) throws JsonProcessingException {
-        return authService.getMemberIdFromAccessToken(request);
     }
 
 }

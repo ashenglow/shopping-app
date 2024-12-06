@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import test.shop.domain.model.exception.CustomTokenException;
 import test.shop.domain.model.member.MemberType;
 import test.shop.infrastructure.persistence.redis.RedisService;
 
@@ -153,12 +154,17 @@ public class TokenUtil {
      * @param accessToken
      * @return memberId
      */
-    public Long getMemberId(String accessToken) throws JsonProcessingException {
-        String subjectStr = parseToken(accessToken).get("subject", String.class);
-        log.info("subjectStr: {}", subjectStr);
-        TokenSubject subject = new ObjectMapper().readValue(subjectStr, TokenSubject.class);
-        log.info("memberId: {}", subject.getMemberId());
-        return subject.getMemberId();
+    public Long getMemberId(String accessToken){
+        try {
+            String subjectStr = parseToken(accessToken).get("subject", String.class);
+            log.info("subjectStr: {}", subjectStr);
+            TokenSubject subject = new ObjectMapper().readValue(subjectStr, TokenSubject.class);
+            log.info("memberId: {}", subject.getMemberId());
+            return subject.getMemberId();
+        }catch (JsonProcessingException e) {
+            throw new CustomTokenException("Failed to parse token payload");
+        }
+
     }
 
     public String getUsername(String accessToken) throws JsonProcessingException {

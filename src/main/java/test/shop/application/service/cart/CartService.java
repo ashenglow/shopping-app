@@ -90,16 +90,27 @@ public class CartService {
     public List<Long> deleteCartItems(List<Long> itemIds, Long memberId) {
         Cart cart = getCartByMemberId(memberId);
         List<Long> removedItemIds = new ArrayList<>();
-        for (Long itemId : itemIds) {
-            CartItem cartItem = findCartItem(cart, itemId);
-            cartItem.delete();
-            removedItemIds.add(itemId);
-        }
+
+        cart.getCartItems().removeIf(cartItem -> {
+            if(itemIds.contains(cartItem.getItem().getId())){
+                removedItemIds.add(cartItem.getItem().getId());
+                return true;
+            }
+            return false;
+        });
+
         cartRepository.save(cart);
-        log.info("[CartService] Deleted cart items: itemId={}, memberId={}", itemIds, memberId);
+        log.info("[CartService] Deleted cart items: itemIds={}, memberId={}", itemIds, memberId);
         return removedItemIds;
     }
 
+    @Transactional
+    public void clearCart(Long memberId) {
+        Cart cart = getCartByMemberId(memberId);
+        cart.getCartItems().clear();
+        cartRepository.save(cart);
+        log.info("[CartService] Cleared all items from cart for=memberId={}", memberId);
+    }
 
 
 }
