@@ -11,7 +11,7 @@ import test.shop.exception.web.CustomRefreshTokenFailException;
 
 @Slf4j
 @RestControllerAdvice
-public class ExControllerAdvice {
+public class GlobalExceptionHandler {
 
 //    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(IllegalArgumentException.class)
