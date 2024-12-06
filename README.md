@@ -14,6 +14,8 @@
 Footer, About, Login 페이지에 테스트 로그인용 버튼이 있습니다
 <br />
 <br />
+👉 [배포 페이지 바로가기](https://soolstore.r-e.kr/)
+<br />
 
 ## 🛠️ 프로젝트 아키텍쳐
 <img src="https://i.ibb.co/vhSfJzM/shop-flow.png" alt="shop-flow">
