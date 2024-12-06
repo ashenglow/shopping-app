@@ -19,7 +19,8 @@ Footer, About, Login 페이지에 테스트 로그인용 버튼이 있습니다
 
 ## 🛠️ 프로젝트 아키텍쳐
 <img src="https://i.ibb.co/vhSfJzM/shop-flow.png" alt="shop-flow">
-
+<br />
+Github Action, AWS CodeDeploy를 사용하여 CI/CD를 자동화했습니다.
 <br />
 
 ### 화면 구성
