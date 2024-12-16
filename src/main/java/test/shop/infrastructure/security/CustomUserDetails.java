@@ -26,7 +26,7 @@ private final String username;
 
     public CustomUserDetails(MemberAuthDto member) {
         this.member = member;
-        this.username = member.getId().toString();
+        this.username= member.getId().toString();
         this.password = member.getPassword();
         this.authorities = Collections.singletonList(new SimpleGrantedAuthority(member.getRole()));
         this.isAccountNonExpired = true;

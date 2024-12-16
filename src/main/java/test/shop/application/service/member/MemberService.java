@@ -39,7 +39,7 @@ public class MemberService {
     }
 
     private void validateDuplicateMember(MemberJoinRequestDto dto) {
-        boolean validate = memberRepository.findMemberByUsername(dto.getUsername())
+        boolean validate = memberRepository.findMemberByUserId(dto.getUserId())
                 .isEmpty();
         if (!validate) {
             throw new IllegalStateException("이미 존재하는 회원입니다.");
@@ -48,7 +48,7 @@ public class MemberService {
 
     private Member buildMemberFromDto(MemberJoinRequestDto dto){
         return Member.builder()
-                .username(dto.getUsername())
+                .userId(dto.getUserId())
                 .password(dto.getPassword())
                 .memberType(dto.getMemberType())
                 .address(dto.getAddress())
@@ -82,9 +82,9 @@ public class MemberService {
 
     @Transactional
     public void update(ProfileDto dto) {
-        Member foundMember = memberRepository.findMemberByUsername(dto.getUsername())
+        Member foundMember = memberRepository.findMemberByUserId(dto.getUserId())
                 .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
-        foundMember.updateMember(dto.getPassword(), dto.getUsername(), dto.getAddress());
+        foundMember.updateMember(dto.getPassword(), dto.getNickname(), dto.getAddress(), dto.getEmail());
     }
 
     @Transactional

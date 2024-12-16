@@ -67,8 +67,8 @@ public class TokenUtil {
     /**
      * JWT 생성
      */
-    public String createToken(Long memberId, String username, MemberType memberType) throws JsonProcessingException {
-        TokenSubject subject = new TokenSubject(memberId, username, memberType);
+    public String createToken(Long memberId, String userId, MemberType memberType) throws JsonProcessingException {
+        TokenSubject subject = new TokenSubject(memberId, userId, memberType);
         ZonedDateTime now = ZonedDateTime.now();
         ZonedDateTime validTime = now.plusSeconds(accessTokenExpTime);
         String subjectStr = new ObjectMapper().writeValueAsString(subject);
@@ -102,10 +102,10 @@ public class TokenUtil {
      * @param accessToken
      * @return isValid
      */
-    public boolean validateToken(String username, String accessToken) {
+    public boolean validateToken(String userId, String accessToken) {
         try {
-            if(redisService.getValues(username, accessToken) != null
-             && redisService.getValues(username, accessToken).equals("logout") ) {
+            if(redisService.getValues(userId, accessToken) != null
+             && redisService.getValues(userId, accessToken).equals("logout") ) {
                 return false;
             }
             Claims claims = Jwts.parser()
@@ -141,7 +141,7 @@ public class TokenUtil {
             TokenSubject subject = new ObjectMapper().readValue(subjectStr, TokenSubject.class);
             String role = subject.getMemberType().getRoleName();
 
-            return new UsernamePasswordAuthenticationToken(subject.getUsername(), null, Collections.singletonList(new SimpleGrantedAuthority(role)));
+            return new UsernamePasswordAuthenticationToken(subject.getUserId(), null, Collections.singletonList(new SimpleGrantedAuthority(role)));
 
         } catch (Exception e) {
             throw new IllegalArgumentException("Access token not found");
@@ -167,10 +167,10 @@ public class TokenUtil {
 
     }
 
-    public String getUsername(String accessToken) throws JsonProcessingException {
+    public String getUserId(String accessToken) throws JsonProcessingException {
         String subjectStr = parseToken(accessToken).get("subject", String.class);
         TokenSubject subject = new ObjectMapper().readValue(subjectStr, TokenSubject.class);
-        return subject.getUsername();
+        return subject.getUserId();
     }
 
     /**

@@ -10,21 +10,21 @@ import java.io.Serializable;
 @Getter
 public class TokenSubject implements Serializable {
     private final Long memberId;
-    private final String username;
+    private final String userId;
     private final MemberType memberType;
 
 @JsonCreator
-    public TokenSubject(@JsonProperty("memberId") Long memberId, @JsonProperty("username") String username, @JsonProperty("memberType") MemberType memberType) {
+    public TokenSubject(@JsonProperty("memberId") Long memberId, @JsonProperty("userId") String userId, @JsonProperty("memberType") MemberType memberType) {
         this.memberId = memberId;
-        this.username = username;
+        this.userId = userId;
         this.memberType = memberType;
     }
 
-    public static TokenSubject userTokenSubject(Long memberId, String username) {
-        return new TokenSubject(memberId, username, MemberType.USER);
+    public static TokenSubject userTokenSubject(Long memberId, String userId) {
+        return new TokenSubject(memberId, userId, MemberType.USER);
     }
 
-    public static TokenSubject adminTokenSubject(Long memberId, String username) {
-        return new TokenSubject(memberId, username, MemberType.ADMIN);
+    public static TokenSubject adminTokenSubject(Long memberId, String userId) {
+        return new TokenSubject(memberId, userId, MemberType.ADMIN);
     }
 }

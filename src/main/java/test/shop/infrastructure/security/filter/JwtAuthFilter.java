@@ -62,8 +62,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         try {
   //request header 에서 token 추출
             String accessToken = tokenUtil.extractAccessToken(request);
-            String username = tokenUtil.getUsername(accessToken);
-            if (accessToken != null && !tokenUtil.validateToken(username, accessToken)) {
+            String userId = tokenUtil.getUserId(accessToken);
+            if (accessToken != null && !tokenUtil.validateToken(userId, accessToken)) {
                 Long memberId = tokenUtil.getMemberId(accessToken);
                 //user와 토큰 일치 시 userDetails 생성
                 UserDetails userDetails = customUserDetailsService.loadUserByUsername(memberId.toString());

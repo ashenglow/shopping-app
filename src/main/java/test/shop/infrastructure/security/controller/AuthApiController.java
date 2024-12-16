@@ -40,7 +40,7 @@ public class AuthApiController {
             @RequestBody MemberLoginDto request, HttpServletResponse response
     ) throws JsonProcessingException {
         UserModelDto dto = authService.login(request);
-        String refreshToken = authService.createRefreshToken(request.getUsername());
+        String refreshToken = authService.createRefreshToken(request.getUserId());
         authService.setRefreshTokenToCookie(refreshToken, response);
         log.info("refreshToken : " + refreshToken);
         return ResponseEntity.status(200).body(dto);
@@ -50,8 +50,8 @@ public class AuthApiController {
     @Operation(summary = "리프레시", description = "토큰을 리프레시합니다.")
     public ResponseEntity<UserModelDto> refresh(HttpServletRequest request, HttpServletResponse response) throws JsonProcessingException {
         String refreshToken = authService.extractRefreshTokenFromCookie(request);
-        String username = authService.decodeUsernameFromRefreshToken(refreshToken);
-        UserModelDto dto = authService.refresh(username, refreshToken);
+        String userId = authService.decodeuserIdFromRefreshToken(refreshToken);
+        UserModelDto dto = authService.refresh(userId, refreshToken);
 
         return ResponseEntity.status(200).body(dto);
 

@@ -64,19 +64,19 @@ public class InitDb {
 
         public void dbInit1() {
             // Admin user
-            MemberJoinRequestDto adminUser = createAdminJoinRequestDto("user1", "1234", new Address("Seoul", "Jongno-gu", "03181"));
+            MemberJoinRequestDto adminUser = createAdminJoinRequestDto("user1","user1", "user1@gmail.com", "1234", new Address("Seoul", "Jongno-gu", "03181"));
             // Regular users
             List<MemberJoinRequestDto> initialUsers = Arrays.asList(
-                    createMemberJoinRequestDto("user2", "1234", new Address("Seoul", "Gangnam-gu", "06001")),
-                    createMemberJoinRequestDto("soju_lover", "1234", new Address("Seoul", "Yongsan-gu", "06001")),
-                    createMemberJoinRequestDto("wine_enthusiast", "user5678", new Address("Busan", "Haeundae-gu", "48099")),
-                    createMemberJoinRequestDto("tradition_seeker", "user9012", new Address("Incheon", "Yeonsu-gu", "21999")),
-                    createMemberJoinRequestDto("casual_drinker", "user3456", new Address("Daegu", "Suseong-gu", "42188")),
-                    createMemberJoinRequestDto("soju_expert", "user7890", new Address("Gwangju", "Seo-gu", "61949")),
-                    createMemberJoinRequestDto("first_timer", "user2345", new Address("Daejeon", "Yuseong-gu", "34126")),
-                    createMemberJoinRequestDto("beer_novice", "user6789", new Address("Ulsan", "Nam-gu", "44701")),
-                    createMemberJoinRequestDto("fruit_wine_lover", "user0123", new Address("Sejong", "Hansol-dong", "30151")),
-                    createMemberJoinRequestDto("wine_connoisseur", "user4567", new Address("Jeju", "Jeju-si", "63122"))
+                    createMemberJoinRequestDto("user2", "user2", "user2@gmail.com", "1234", new Address("Seoul", "Gangnam-gu", "06001")),
+                    createMemberJoinRequestDto("soju_lover", "soju_lover","soju_lover@gmail.com","1234", new Address("Seoul", "Yongsan-gu", "06001")),
+                    createMemberJoinRequestDto("wine_enthusiast", "wine_enthusiast","wine_enthusiast@gmail.com", "user5678", new Address("Busan", "Haeundae-gu", "48099")),
+                    createMemberJoinRequestDto("tradition_seeker","tradition_seeker",  "tradition_seeker@gmail.com","user9012", new Address("Incheon", "Yeonsu-gu", "21999")),
+                    createMemberJoinRequestDto("casual_drinker", "casual_drinker","casual_drinker@gmail.com","user3456", new Address("Daegu", "Suseong-gu", "42188")),
+                    createMemberJoinRequestDto("soju_expert", "soju_expert","soju_expert@gmail.com","user7890", new Address("Gwangju", "Seo-gu", "61949")),
+                    createMemberJoinRequestDto("first_timer", "first_timer","first_timer@gmail.com","user2345", new Address("Daejeon", "Yuseong-gu", "34126")),
+                    createMemberJoinRequestDto("beer_novice","beer_novice","beer_novice@gmail.com", "user6789", new Address("Ulsan", "Nam-gu", "44701")),
+                    createMemberJoinRequestDto("fruit_wine_lover", "fruit_wine_lover","fruit_wine_lover@gmail.com","user0123", new Address("Sejong", "Hansol-dong", "30151")),
+                    createMemberJoinRequestDto("wine_connoisseur","wine_connoisseur",  "wine_connoisseur@gmail.com", "user4567", new Address("Jeju", "Jeju-si", "63122"))
             );
             for (MemberJoinRequestDto dto : initialUsers) {
                 try {
@@ -187,9 +187,11 @@ public class InitDb {
             }
 
         }
-        private MemberJoinRequestDto createMemberJoinRequestDto(String name, String password, Address address) {
+        private MemberJoinRequestDto createMemberJoinRequestDto(String userId, String nickname, String email, String password, Address address) {
             return MemberJoinRequestDto.builder()
-                    .username(name)
+                    .userId(userId)
+                    .nickname(nickname)
+                    .email(email)
                     .password(password)
                     .memberType(MemberType.USER)
                     .address(address)
@@ -197,9 +199,11 @@ public class InitDb {
 
         }
 
-        private MemberJoinRequestDto createAdminJoinRequestDto(String name, String password, Address address) {
+        private MemberJoinRequestDto createAdminJoinRequestDto(String userId, String nickname, String email, String password, Address address) {
             return MemberJoinRequestDto.builder()
-                    .username(name)
+                    .userId(userId)
+                    .nickname(nickname)
+                    .email(email)
                     .password(password)
                     .memberType(MemberType.ADMIN)
                     .address(address)
@@ -228,12 +232,12 @@ public class InitDb {
             return dto;
         }
 
-        private ReviewDto createReview(Long productId, Long userId, String username,
+        private ReviewDto createReview(Long productId, Long memberId, String userId,
                                        double rating, String comment) {
             return ReviewDto.builder()
                     .productId(productId)
+                    .memberId(memberId)
                     .userId(userId)
-                    .username(username)
                     .rating(rating)
                     .comment(comment)
                     .build();

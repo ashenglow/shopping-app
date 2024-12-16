@@ -48,20 +48,20 @@ public class RedisService {
         return null;
     }
 
-    public void save(String username, String refreshToken, TokenSubject tokenSubject) {
+    public void save(String userId, String refreshToken, TokenSubject tokenSubject) {
 
         try {
-            redisTemplate.expire(username, 1, TimeUnit.DAYS);
-            hashOperations.put(username, refreshToken, serializeTokenSubject(tokenSubject));
+            redisTemplate.expire(userId, 1, TimeUnit.DAYS);
+            hashOperations.put(userId, refreshToken, serializeTokenSubject(tokenSubject));
             log.info("[RedisTemplateService save]refreshToken: {}", refreshToken);
         } catch (Exception e) {
             log.error("[RedisTemplateService save error]: {}", e.getMessage());
         }
     }
 
-    public TokenSubject findByRefreshToken(String username, String refreshToken) {
+    public TokenSubject findByRefreshToken(String userId, String refreshToken) {
         try {
-            return deserializeTokenSubject(hashOperations.get(username, refreshToken));
+            return deserializeTokenSubject(hashOperations.get(userId, refreshToken));
         } catch (Exception e) {
             log.error("[RedisTemplateService findByRefreshToken error]: {}", e.getMessage());
             return null;
@@ -77,9 +77,9 @@ public class RedisService {
         }
     }
 
-    public boolean existsByRefreshToken(String username, String refreshToken) {
+    public boolean existsByRefreshToken(String userId, String refreshToken) {
         try {
-            return hashOperations.hasKey(username, refreshToken);
+            return hashOperations.hasKey(userId, refreshToken);
 
         } catch (Exception e) {
             log.info("refreshToken: {}", refreshToken);
@@ -100,19 +100,19 @@ public class RedisService {
         }
     }
 
-    public void delete(String username, String refreshToken) {
-        hashOperations.delete(username, refreshToken);
+    public void delete(String userId, String refreshToken) {
+        hashOperations.delete(userId, refreshToken);
         log.info("[RedisTemplateService delete]refreshToken: {}", refreshToken);
     }
 
-    public String getValues(String username, String key) {
-        return hashOperations.get(username, key);
+    public String getValues(String userId, String key) {
+        return hashOperations.get(userId, key);
     }
 
-    public void setValues(String username, String key, String value, long time, TimeUnit timeUnit) {
+    public void setValues(String userId, String key, String value, long time, TimeUnit timeUnit) {
         try {
-            redisTemplate.expire(username, time, timeUnit);
-            hashOperations.put(username, key, value);
+            redisTemplate.expire(userId, time, timeUnit);
+            hashOperations.put(userId, key, value);
             log.info("[RedisTemplateService setValues]key: {}, value: {}", key, value);
         } catch (Exception e) {
             log.error("[RedisTemplateService setValues error]: {}", e.getMessage());
