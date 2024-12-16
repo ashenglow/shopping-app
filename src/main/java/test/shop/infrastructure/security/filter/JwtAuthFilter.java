@@ -41,7 +41,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             "/api/public/**",
             "/monitoring/**",
             "/favicon.ico",
-            "/static/**"
+            "/static/**",
+            "/oauth2/authorize/**",    // Add OAuth2 authorization endpoint
+            "/oauth2/callback/**",     // Add OAuth2 callback endpoint
+            "/api/v1/oauth2/url/**"
 
 
 
