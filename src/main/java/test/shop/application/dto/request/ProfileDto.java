@@ -13,5 +13,6 @@ public class ProfileDto {
     private String email;
     private String password;
     private Address address;
+    private String userImg;
 
 }

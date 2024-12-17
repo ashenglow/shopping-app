@@ -28,9 +28,12 @@ public class Member {
     @Column(unique = true)
     private String email; // primary identifier for Oauth2
 
-
+    @Column
     private String password;
+    @Column
     private String nickname;
+
+    @Column(nullable = true)
     private String userImg;
 
     @Enumerated(EnumType.STRING)
@@ -54,13 +57,14 @@ public class Member {
 
     @Builder
     public Member(String userId, String email, String password, String nickname, MemberType memberType, Address address,
-                 String provider, String providerId) {
+                 String userImg, String provider, String providerId) {
         this.userId = userId;
         this.email = email;
         this.password = password;
         this.nickname = nickname;
         this.memberType = memberType;
         this.address = address;
+        this.userImg = userImg;
         this.provider = provider;  // Default to null
         this.providerId = providerId;
 
@@ -78,11 +82,12 @@ public class Member {
         reviews.add(review);
     }
 
-    public void updateMember(String password, String nickname, Address address, String email) {
+    public void updateMember(String password, String nickname, Address address, String email, String userImg) {
         this.password = password;
         this.nickname = nickname;
         this.address = address;
         this.email = email;
+        this.userImg = userImg;
     }
 
     public MemberJoinRequestDto toMemberJoinRequestDto() {

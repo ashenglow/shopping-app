@@ -51,14 +51,17 @@ public class AuthService {
     private Member buildMemberFromDto(MemberJoinRequestDto dto){
         Member member = Member.builder()
                 .userId(dto.getUserId())
+                .nickname(dto.getNickname())
+                .email(dto.getEmail())
                 .password(dto.getPassword())
                 .memberType(MemberType.USER)
                 .address(dto.getAddress())
+                .userImg(dto.getUserImg())
+                .provider(dto.getProvider())
+                .providerId(dto.getProviderId())
                 .build();
         if( dto.getUserImg() == null){
             member.addUserImg("https://i.pravatar.cc/300");
-        }else {
-            member.addUserImg(dto.getUserImg());
         }
         return member;
     }
@@ -66,15 +69,18 @@ public class AuthService {
     private Member buildAdminFromDto(MemberJoinRequestDto dto){
         Member member = Member.builder()
                 .userId(dto.getUserId())
+                .nickname(dto.getNickname())
                 .password(dto.getPassword())
+                .email(dto.getEmail())
                 .memberType(MemberType.ADMIN)
                 .address(dto.getAddress())
+                .userImg(dto.getUserImg())
+                .provider(dto.getProvider())
+                .providerId(dto.getProviderId())
                 .build();
 
         if( dto.getUserImg() == null){
             member.addUserImg("https://i.pravatar.cc/300");
-        }else {
-            member.addUserImg(dto.getUserImg());
         }
         return member;
     }

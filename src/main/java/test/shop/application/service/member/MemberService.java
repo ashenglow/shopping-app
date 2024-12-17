@@ -49,8 +49,13 @@ public class MemberService {
     private Member buildMemberFromDto(MemberJoinRequestDto dto){
         return Member.builder()
                 .userId(dto.getUserId())
+                .nickname(dto.getNickname())
                 .password(dto.getPassword())
+                .email(dto.getEmail())
                 .memberType(dto.getMemberType())
+                .userImg(dto.getUserImg())
+                .provider(dto.getProvider())
+                .providerId(dto.getProviderId())
                 .address(dto.getAddress())
                 .build();
     }
@@ -84,7 +89,7 @@ public class MemberService {
     public void update(ProfileDto dto) {
         Member foundMember = memberRepository.findMemberByUserId(dto.getUserId())
                 .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
-        foundMember.updateMember(dto.getPassword(), dto.getNickname(), dto.getAddress(), dto.getEmail());
+        foundMember.updateMember(dto.getPassword(), dto.getNickname(), dto.getAddress(), dto.getEmail(), dto.getUserImg());
     }
 
     @Transactional
