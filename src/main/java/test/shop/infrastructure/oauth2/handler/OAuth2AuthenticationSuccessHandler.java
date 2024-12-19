@@ -34,6 +34,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
         Member member = oAuth2User.getMember();
         String userId = member.getUserId();
+        String nickname = member.getNickname();
         try {
             String accessToken = tokenUtil.createToken(
                     member.getId(),
@@ -60,6 +61,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             getRedirectStrategy().sendRedirect(request,response,
                     UriComponentsBuilder.fromUriString(targetUrl)
                             .queryParam("token", accessToken)
+                            .queryParam("userId", userId)
+                            .queryParam("nickname", nickname)
                             .build().toUriString());
 
         } catch (Exception e) {
