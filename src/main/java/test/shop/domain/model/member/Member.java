@@ -90,6 +90,10 @@ public class Member {
         this.userImg = userImg;
     }
 
+    public void updateEmail(String email) {
+        this.email = email;
+    }
+
     public MemberJoinRequestDto toMemberJoinRequestDto() {
         return MemberJoinRequestDto.builder()
                 .id(this.id)
