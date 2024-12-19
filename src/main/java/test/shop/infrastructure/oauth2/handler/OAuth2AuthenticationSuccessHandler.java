@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 import test.shop.domain.model.member.Member;
 import test.shop.infrastructure.oauth2.CustomOAuth2User;
 import test.shop.infrastructure.oauth2.OAuth2AuthorizationRequestBasedOnCookieRepository;
@@ -54,8 +55,15 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                     .map(Cookie::getValue)
                     .orElse(getDefaultTargetUrl());
 
+            authorizationRequestRepository.removeCookies(request, response);
 
+            getRedirectStrategy().sendRedirect(request,response,
+                    UriComponentsBuilder.fromUriString(targetUrl)
+                            .queryParam("token", accessToken)
+                            .build().toUriString());
 
+        } catch (Exception e) {
+            throw new IOException("Failed to process OAuth2AuthenticationSuccessHandler.", e);
         }
     }
 }
