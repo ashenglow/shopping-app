@@ -7,8 +7,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -16,9 +14,12 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import test.shop.exception.web.CustomAccessDeniedHandler;
 import test.shop.exception.web.CustomAuthEntryPointHandler;
-import test.shop.infrastructure.persistence.redis.RedisService;
+import test.shop.infrastructure.oauth2.CustomOAuth2UserService;
+import test.shop.infrastructure.oauth2.OAuth2AuthorizationRequestBasedOnCookieRepository;
+import test.shop.infrastructure.oauth2.handler.OAuth2AuthenticationFailureHandler;
+import test.shop.infrastructure.oauth2.handler.OAuth2AuthenticationSuccessHandler;
 import test.shop.infrastructure.security.filter.JwtAuthFilter;
-import test.shop.infrastructure.security.jwt.TokenUtil;
+import test.shop.infrastructure.security.token.TokenUtil;
 import test.shop.infrastructure.security.filter.MalFormedRequestFilter;
 import test.shop.infrastructure.security.service.CustomUserDetailsService;
 
@@ -31,9 +32,11 @@ import java.util.Arrays;
 public class SecurityConfig {
     private final CustomUserDetailsService customUserDetailsService;
     private final TokenUtil tokenUtil;
-    private final RedisService redisService;
     private final CustomAuthEntryPointHandler customAuthEntryPointHandler;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2AuthorizationRequestBasedOnCookieRepository oAuth2AuthorizationRepository;
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private static final String[] AUTH_WHITELIST = {
             "/api/public/**",
             "/monitoring/**",
@@ -43,7 +46,11 @@ public class SecurityConfig {
         "/swagger-ui/**",
         "/swagger-ui.html",
             "/favicon.ico",
-            "/static/**"
+            "/static/**",
+            "/oauth2/authorization/**",    // Add OAuth2 authorization endpoint
+            "/oauth2/callback/**",     // Add OAuth2 callback endpoint
+            "/api/v1/oauth2/url/**",
+                    "/login/oauth2/code/**"
     };
 
 
@@ -56,10 +63,6 @@ public class SecurityConfig {
         return new JwtAuthFilter(customUserDetailsService, tokenUtil, customAuthEntryPointHandler);
     }
 
-     @Bean
-    public PasswordEncoder PasswordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 
     @Bean
     public MalFormedRequestFilter malformedRequestFilter() {
@@ -103,6 +106,20 @@ public class SecurityConfig {
         http.formLogin(AbstractHttpConfigurer::disable);
         http.httpBasic(AbstractHttpConfigurer::disable);
 
+        http
+                .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(authorization -> authorization
+                                .baseUri("/oauth2/authorization")
+                        )
+                        .redirectionEndpoint(redirection -> redirection
+                                .baseUri("/login/oauth2/code/*")
+                        )
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
+                        .failureHandler(new OAuth2AuthenticationFailureHandler())
+                        .successHandler(oAuth2AuthenticationSuccessHandler)
+                );
 
         // JwtAuthFilter를 UsernamePasswordAuthenticationFilter 전에 추가
         http.addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class)

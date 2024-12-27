@@ -9,6 +9,7 @@ import test.shop.domain.model.order.Order;
 import test.shop.application.dto.request.ProfileDto;
 import test.shop.application.dto.response.UserModelDto;
 
+import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,12 +22,28 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
     private Long id;
+    // Authentication identifiers
+    @Column(unique = true)
+    private String userId; // login identifier
+    @Column(unique = true)
+    private String email; // primary identifier for Oauth2
+
+    @Column
     private String password;
+    @Column
+    private String nickname;
+
+    @Column(nullable = true)
+    private String userImg;
+
     @Enumerated(EnumType.STRING)
     private MemberType memberType;
 
-    private String username;
-    private String userImg;
+    // Oauth2 fields
+    @Column(nullable = true)
+    private String provider;
+    @Column(nullable = true)
+    private String providerId;
 
     @Embedded
     private Address address;
@@ -39,11 +56,17 @@ public class Member {
 
 
     @Builder
-    public Member(String username, String password, MemberType memberType, Address address) {
+    public Member(String userId, String email, String password, String nickname, MemberType memberType, Address address,
+                 String userImg, String provider, String providerId) {
+        this.userId = userId;
+        this.email = email;
         this.password = password;
+        this.nickname = nickname;
         this.memberType = memberType;
-        this.username = username;
         this.address = address;
+        this.userImg = userImg;
+        this.provider = provider;  // Default to null
+        this.providerId = providerId;
 
     }
 
@@ -59,16 +82,22 @@ public class Member {
         reviews.add(review);
     }
 
-    public void updateMember(String password, String username, Address address) {
+    public void updateMember(String password, String nickname, Address address, String email, String userImg) {
         this.password = password;
-        this.username = username;
+        this.nickname = nickname;
         this.address = address;
+        this.email = email;
+        this.userImg = userImg;
+    }
+
+    public void updateEmail(String email) {
+        this.email = email;
     }
 
     public MemberJoinRequestDto toMemberJoinRequestDto() {
         return MemberJoinRequestDto.builder()
                 .id(this.id)
-                .username(this.username)
+                .userId(this.userId)
                 .memberType(MemberType.USER)
                 .password(this.password)
                 .address(this.address)
@@ -78,7 +107,7 @@ public class Member {
     public MemberJoinRequestDto toAdminJoinRequestDto() {
         return MemberJoinRequestDto.builder()
                 .id(this.id)
-                .username(this.username)
+                .userId(this.userId)
                 .memberType(MemberType.ADMIN)
                 .password(this.password)
                 .address(this.address)
@@ -89,7 +118,9 @@ public class Member {
     public UserModelDto toUserModelDto(String accessToken) {
         UserModelDto userModelDto = new UserModelDto();
         userModelDto.setId(id);
-        userModelDto.setName(username);
+        userModelDto.setUserId(userId);
+        userModelDto.setEmail(email);
+        userModelDto.setNickname(nickname);
         userModelDto.setRole(memberType.name());
         userModelDto.setUserImg(userImg);
         userModelDto.setAccessToken(accessToken);
@@ -99,7 +130,9 @@ public class Member {
     public ProfileDto toProfileDto(Long id) {
         ProfileDto profileDto = new ProfileDto();
         profileDto.setId(id);
-        profileDto.setUsername(username);
+        profileDto.setUserId(userId);
+        profileDto.setNickname(nickname);
+        profileDto.setEmail(email);
         profileDto.setPassword(password);
         profileDto.setAddress(address);
         return profileDto;

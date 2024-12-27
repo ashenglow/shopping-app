@@ -15,7 +15,7 @@ public class AdminController {
     private final InitDb initDb;
 
     @PostMapping("/reinitialize-db")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> reinitializeDb() {
         initDb.reinitialize();
         return ResponseEntity.ok("Reinitialized DB");

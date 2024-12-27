@@ -29,7 +29,7 @@ public class ReviewService {
     @Transactional(readOnly = false)
     public void saveReview(ReviewDto form) {
 
-        Member member = memberService.findMemberById(form.getUserId());
+        Member member = memberService.findMemberById(form.getMemberId());
 
         Item item = itemRepository.findItemById(form.getProductId())
                 .orElseThrow(() -> new EntityNotFoundException("Item not found"));

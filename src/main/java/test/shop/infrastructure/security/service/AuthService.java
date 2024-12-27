@@ -1,6 +1,7 @@
 package test.shop.infrastructure.security.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,9 +16,10 @@ import test.shop.domain.model.exception.CustomTokenException;
 import test.shop.domain.model.member.MemberType;
 import test.shop.exception.web.CustomRefreshTokenFailException;
 import test.shop.infrastructure.persistence.redis.RedisService;
-import test.shop.infrastructure.security.jwt.TokenSubject;
-import test.shop.infrastructure.security.jwt.TokenUtil;
-import test.shop.application.dto.request.ProfileDto;
+import test.shop.infrastructure.security.token.TokenData;
+import test.shop.infrastructure.security.token.TokenService;
+import test.shop.infrastructure.security.token.TokenSubject;
+import test.shop.infrastructure.security.token.TokenUtil;
 import test.shop.application.dto.response.MemberLoginDto;
 import test.shop.application.dto.response.UserModelDto;
 import test.shop.domain.repository.MemberRepository;
@@ -35,6 +37,7 @@ public class AuthService {
     private final TokenUtil tokenUtil;
     private final RedisService redisService;
     private final MemberRepository memberRepository;
+    private final TokenService tokenService;
 
     @Transactional(readOnly = false)
     public void register(MemberJoinRequestDto dto) throws JsonProcessingException {
@@ -51,47 +54,53 @@ public class AuthService {
 
     private Member buildMemberFromDto(MemberJoinRequestDto dto){
         Member member = Member.builder()
-                .username(dto.getUsername())
+                .userId(dto.getUserId())
+                .nickname(dto.getNickname())
+                .email(dto.getEmail())
                 .password(dto.getPassword())
                 .memberType(MemberType.USER)
                 .address(dto.getAddress())
+                .userImg(dto.getUserImg())
+                .provider(dto.getProvider())
+                .providerId(dto.getProviderId())
                 .build();
         if( dto.getUserImg() == null){
             member.addUserImg("https://i.pravatar.cc/300");
-        }else {
-            member.addUserImg(dto.getUserImg());
         }
         return member;
     }
 
     private Member buildAdminFromDto(MemberJoinRequestDto dto){
         Member member = Member.builder()
-                .username(dto.getUsername())
+                .userId(dto.getUserId())
+                .nickname(dto.getNickname())
                 .password(dto.getPassword())
+                .email(dto.getEmail())
                 .memberType(MemberType.ADMIN)
                 .address(dto.getAddress())
+                .userImg(dto.getUserImg())
+                .provider(dto.getProvider())
+                .providerId(dto.getProviderId())
                 .build();
 
         if( dto.getUserImg() == null){
             member.addUserImg("https://i.pravatar.cc/300");
-        }else {
-            member.addUserImg(dto.getUserImg());
         }
         return member;
     }
 
     public UserModelDto login(MemberLoginDto dto) throws JsonProcessingException {
-        String username = dto.getUsername();
+        String userId = dto.getUserId();
         String password = dto.getPassword();
 
-        Member member = memberRepository.findMemberByUsername(username)
+        Member member = memberRepository.findMemberByUserId(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
 
         if (!member.getPassword().equals(password)) {
             throw new IllegalArgumentException("Password is incorrect");
         }
 
-        String accessToken = tokenUtil.createToken(member.getId(), username, member.getMemberType());
+        String accessToken = tokenUtil.createToken(member.getId(), userId, member.getMemberType());
         return member.toUserModelDto(accessToken);
     }
 
@@ -106,41 +115,27 @@ public class AuthService {
 
     }
 
-    public String getUsernameFromAccessToken(HttpServletRequest request) {
-        try {
+    public String getUserIdFromAccessToken(HttpServletRequest request) {
+
             String accessToken = tokenUtil.extractAccessToken(request);
             if (accessToken == null) {
                 throw new CustomTokenException("Access token not found");
             }
-            return tokenUtil.getUsername(accessToken);
-        } catch (JsonProcessingException e) {
-            log.error("Failed to process token", e);
-            throw new CustomTokenException("Invalid token format");
-        }
-
+            return tokenUtil.getUserId(accessToken);
     }
 
-    public String createRefreshToken(String username) {
+    public String createRefreshToken(String userId) throws JsonProcessingException {
 
-        Member member = memberRepository.findMemberByUsername(username)
+        Member member = memberRepository.findMemberByUserId(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
-        String uuid = UUID.randomUUID().toString();
-        String tokenData = uuid + ":" + username;
-        String refreshToken = Base64.getEncoder().encodeToString(tokenData.getBytes());
-        redisService.save(username, refreshToken, new TokenSubject(member.getId(), username, member.getMemberType()));
-        return refreshToken;
+        return tokenService.createAndSaveRefreshToken(member);
     }
 
-    public String decodeUsernameFromRefreshToken(String refreshToken) {
-        try {
-            String tokenData = new String(Base64.getDecoder().decode(refreshToken));
-            return tokenData.split(":")[1];
-        } catch (Exception e) {
-            throw new CustomRefreshTokenFailException("Decode username from refresh token failed: " + e.getMessage());
-        }
-
+    public String decodeRefreshToken(String refreshToken) {
+       return tokenUtil.decodeUserIdFromRefreshToken(refreshToken);
 
     }
+
 
     public void setRefreshTokenToCookie(String refreshToken, HttpServletResponse response) {
 
@@ -150,12 +145,12 @@ public class AuthService {
         response.addCookie(cookie);
     }
 
-    public UserModelDto refresh(String username, String refreshToken){
+    public UserModelDto refresh(String userId, String refreshToken){
         try {
-            if (refreshToken != null && redisService.existsByRefreshToken(username, refreshToken)) {
-                TokenSubject tokenSubject = redisService.findByRefreshToken(username, refreshToken);
-                String accessToken = tokenUtil.createToken(tokenSubject.getMemberId(), tokenSubject.getUsername(), tokenSubject.getMemberType());
-                Member member = memberRepository.findMemberByUsername(username)
+            if (refreshToken != null && redisService.existsByRefreshToken(userId, refreshToken)) {
+                TokenSubject tokenSubject = redisService.findByRefreshToken(userId, refreshToken);
+                String accessToken = tokenUtil.createToken(tokenSubject.getMemberId(), tokenSubject.getUserId(), tokenSubject.getMemberType());
+                Member member = memberRepository.findMemberByUserId(userId)
                         .orElseThrow(() -> new CustomRefreshTokenFailException( "Refresh token fail. Member not found" ));
                 return member.toUserModelDto(accessToken);
 
@@ -186,10 +181,10 @@ public class AuthService {
     public boolean logout(String accessToken, String refreshToken) {
 
         try {
-            String username = tokenUtil.getUsername(accessToken);
-            if (redisService.existsByRefreshToken(username, refreshToken)) {
-                redisService.delete(username, refreshToken);
-                redisService.setValues(username, accessToken, "logout", tokenUtil.getAccessTokenExpirationMillis(accessToken), TimeUnit.MILLISECONDS);
+            String userId = tokenUtil.getUserId(accessToken);
+            if (redisService.existsByRefreshToken(userId, refreshToken)) {
+                redisService.delete(userId, refreshToken);
+                redisService.setValues(userId, accessToken, "logout", tokenUtil.getAccessTokenExpirationMillis(accessToken), TimeUnit.MILLISECONDS);
                 return true;
             }
         } catch (Exception e) {

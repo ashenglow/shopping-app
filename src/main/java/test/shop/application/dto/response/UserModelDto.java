@@ -11,19 +11,13 @@ import test.shop.domain.model.member.Member;
 public class UserModelDto {
 
     private Long id;
-    private String name;
+    private String userId;
+    private String nickname;
+    private String email;
     private String role;
     private String password;
     private String userImg;
     private String accessToken;
 
-    public UserModelDto toUserModelDto(Member member, String accessToken) {
-        this.id = member.getId();
-        this.name = member.getUsername();
-        this.role = member.getMemberType().name();
-        this.password = member.getPassword();
-        this.userImg = member.getUserImg();
-        this.accessToken = accessToken;
-        return this;
-    }
+
 }

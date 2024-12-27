@@ -7,17 +7,17 @@ import test.shop.domain.model.member.Member;
 public class UserResDto {
 
     private final Long memberId;
-    private final String username;
+    private final String userId;
 
-    public UserResDto(Long memberId, String username) {
+    public UserResDto(Long memberId, String userId) {
         this.memberId = memberId;
-        this.username = username;
+        this.userId = userId;
     }
 
     public static UserResDto of(Member member) {
         return new UserResDto(
                 member.getId(),
-                member.getUsername()
+                member.getUserId()
         );
     }
 }

@@ -8,8 +8,11 @@ import test.shop.domain.value.Address;
 @Setter
 public class ProfileDto {
     private Long id;
-    private String username;
+    private String userId;
+    private String nickname;
+    private String email;
     private String password;
     private Address address;
+    private String userImg;
 
 }

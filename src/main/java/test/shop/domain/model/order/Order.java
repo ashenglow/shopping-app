@@ -82,7 +82,7 @@ public class Order extends BaseEntity {
        OrderDto orderDto = new OrderDto();
 
        orderDto.setOrderId(this.getId());
-       orderDto.setName(this.getMember().getUsername());
+       orderDto.setName(this.getMember().getNickname());
        orderDto.setStatus(this.getStatus());
 
        orderDto.setAddress(this.getDelivery().getAddress());

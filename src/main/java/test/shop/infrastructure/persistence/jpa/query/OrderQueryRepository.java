@@ -49,7 +49,7 @@ public class OrderQueryRepository {
     }
 
     private BooleanExpression memberNameEq(String memberName) {
-    return !hasLength(memberName) ? null : member.username.contains(memberName);
+    return !hasLength(memberName) ? null : member.userId.contains(memberName);
 }
     private BooleanExpression orderStatusEq(OrderStatus orderStatus) {
         return orderStatus == null ? null : order.status.eq(orderStatus);
