@@ -11,10 +11,14 @@ import test.shop.domain.value.Address;
 @AllArgsConstructor
 public class MemberJoinRequestDto {
     private Long id;
-    private String username;
+    private String userId; //for login
+    private String email; // required for both regular and Oauth2
+    private String nickname; //display name
     private String password;
     private MemberType memberType;
-    private String userImg;
     private Address address;
+    private String userImg;
+    private String provider;
+    private String providerId;
 
 }

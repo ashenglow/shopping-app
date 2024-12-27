@@ -10,8 +10,8 @@ import lombok.*;
 public class ReviewDto {
     private Long id;
     private Long productId;
-    private Long userId;
-    private String username;
+    private Long memberId;
+    private String userId;
     private String userImg;
     private double rating;
     private String comment;

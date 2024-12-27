@@ -116,8 +116,8 @@ public class ItemRestController {
         return authService.getMemberIdFromAccessToken(request);
     }
 
-    private String getUsername(HttpServletRequest request) throws JsonProcessingException {
-        return authService.getUsernameFromAccessToken(request);
+    private String getUserId(HttpServletRequest request) throws JsonProcessingException {
+        return authService.getUserIdFromAccessToken(request);
     }
 
 

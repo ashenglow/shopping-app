@@ -15,7 +15,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.web.filter.OncePerRequestFilter;
 import test.shop.exception.web.CustomAuthEntryPointHandler;
 import test.shop.infrastructure.security.service.CustomUserDetailsService;
-import test.shop.infrastructure.security.jwt.TokenUtil;
+import test.shop.infrastructure.security.token.TokenUtil;
 
 import java.io.IOException;
 import java.util.Set;
@@ -41,7 +41,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             "/api/public/**",
             "/monitoring/**",
             "/favicon.ico",
-            "/static/**"
+            "/static/**",
+            "/oauth2/authorization/**",    // Add OAuth2 authorization endpoint
+            "/oauth2/callback/**",     // Add OAuth2 callback endpoint
+            "/api/v1/oauth2/url/**"
+
 
 
 
@@ -59,9 +63,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         try {
   //request header 에서 token 추출
             String accessToken = tokenUtil.extractAccessToken(request);
-            String username = tokenUtil.getUsername(accessToken);
-            if (accessToken != null && !tokenUtil.validateToken(username, accessToken)) {
+            String userId = tokenUtil.getUserId(accessToken);
+            if (accessToken != null && !tokenUtil.validateToken(userId, accessToken)) {
                 Long memberId = tokenUtil.getMemberId(accessToken);
+                log.debug("Extracted memberId from token: {}", memberId);
+
                 //user와 토큰 일치 시 userDetails 생성
                 UserDetails userDetails = customUserDetailsService.loadUserByUsername(memberId.toString());
 
