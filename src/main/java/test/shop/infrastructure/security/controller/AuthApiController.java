@@ -11,8 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import test.shop.application.dto.request.MemberJoinRequestDto;
-import test.shop.infrastructure.security.jwt.TokenUtil;
-import test.shop.application.dto.request.ProfileDto;
+import test.shop.infrastructure.security.token.TokenUtil;
 import test.shop.application.dto.response.MemberLoginDto;
 import test.shop.application.dto.response.UserModelDto;
 import test.shop.infrastructure.security.service.AuthService;
@@ -50,7 +49,7 @@ public class AuthApiController {
     @Operation(summary = "리프레시", description = "토큰을 리프레시합니다.")
     public ResponseEntity<UserModelDto> refresh(HttpServletRequest request, HttpServletResponse response) throws JsonProcessingException {
         String refreshToken = authService.extractRefreshTokenFromCookie(request);
-        String userId = authService.decodeuserIdFromRefreshToken(refreshToken);
+        String userId = authService.decodeRefreshToken(refreshToken);
         UserModelDto dto = authService.refresh(userId, refreshToken);
 
         return ResponseEntity.status(200).body(dto);

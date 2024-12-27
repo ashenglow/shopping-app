@@ -1,4 +1,4 @@
-package test.shop.infrastructure.security.jwt;
+package test.shop.infrastructure.security.token;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

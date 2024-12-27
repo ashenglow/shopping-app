@@ -1,6 +1,7 @@
 package test.shop.infrastructure.security.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,8 +16,10 @@ import test.shop.domain.model.exception.CustomTokenException;
 import test.shop.domain.model.member.MemberType;
 import test.shop.exception.web.CustomRefreshTokenFailException;
 import test.shop.infrastructure.persistence.redis.RedisService;
-import test.shop.infrastructure.security.jwt.TokenSubject;
-import test.shop.infrastructure.security.jwt.TokenUtil;
+import test.shop.infrastructure.security.token.TokenData;
+import test.shop.infrastructure.security.token.TokenService;
+import test.shop.infrastructure.security.token.TokenSubject;
+import test.shop.infrastructure.security.token.TokenUtil;
 import test.shop.application.dto.response.MemberLoginDto;
 import test.shop.application.dto.response.UserModelDto;
 import test.shop.domain.repository.MemberRepository;
@@ -34,6 +37,7 @@ public class AuthService {
     private final TokenUtil tokenUtil;
     private final RedisService redisService;
     private final MemberRepository memberRepository;
+    private final TokenService tokenService;
 
     @Transactional(readOnly = false)
     public void register(MemberJoinRequestDto dto) throws JsonProcessingException {
@@ -112,40 +116,26 @@ public class AuthService {
     }
 
     public String getUserIdFromAccessToken(HttpServletRequest request) {
-        try {
+
             String accessToken = tokenUtil.extractAccessToken(request);
             if (accessToken == null) {
                 throw new CustomTokenException("Access token not found");
             }
             return tokenUtil.getUserId(accessToken);
-        } catch (JsonProcessingException e) {
-            log.error("Failed to process token", e);
-            throw new CustomTokenException("Invalid token format");
-        }
-
     }
 
-    public String createRefreshToken(String userId) {
+    public String createRefreshToken(String userId) throws JsonProcessingException {
 
         Member member = memberRepository.findMemberByUserId(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
-        String uuid = UUID.randomUUID().toString();
-        String tokenData = uuid + ":" + userId;
-        String refreshToken = Base64.getEncoder().encodeToString(tokenData.getBytes());
-        redisService.save(userId, refreshToken, new TokenSubject(member.getId(), userId, member.getMemberType()));
-        return refreshToken;
+        return tokenService.createAndSaveRefreshToken(member);
     }
 
-    public String decodeuserIdFromRefreshToken(String refreshToken) {
-        try {
-            String tokenData = new String(Base64.getDecoder().decode(refreshToken));
-            return tokenData.split(":")[1];
-        } catch (Exception e) {
-            throw new CustomRefreshTokenFailException("Decode userId from refresh token failed: " + e.getMessage());
-        }
-
+    public String decodeRefreshToken(String refreshToken) {
+       return tokenUtil.decodeUserIdFromRefreshToken(refreshToken);
 
     }
+
 
     public void setRefreshTokenToCookie(String refreshToken, HttpServletResponse response) {
 

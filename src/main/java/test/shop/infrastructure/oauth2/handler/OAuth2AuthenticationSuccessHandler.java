@@ -14,19 +14,20 @@ import test.shop.infrastructure.oauth2.CustomOAuth2User;
 import test.shop.infrastructure.oauth2.OAuth2AuthorizationRequestBasedOnCookieRepository;
 import test.shop.infrastructure.oauth2.util.CookieUtil;
 import test.shop.infrastructure.persistence.redis.RedisService;
-import test.shop.infrastructure.security.jwt.TokenSubject;
-import test.shop.infrastructure.security.jwt.TokenUtil;
+import test.shop.infrastructure.security.token.TokenService;
+import test.shop.infrastructure.security.token.TokenSubject;
+import test.shop.infrastructure.security.token.TokenUtil;
 
 import java.io.IOException;
 import java.util.Base64;
-import java.util.Optional;
 import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     private final TokenUtil tokenUtil;
-    private final RedisService redisService;
+    private final TokenService tokenService;
+    private final CookieUtil cookieUtil;
     private final OAuth2AuthorizationRequestBasedOnCookieRepository authorizationRequestRepository;
 
     @Override
@@ -35,35 +36,43 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         Member member = oAuth2User.getMember();
         String userId = member.getUserId();
         String nickname = member.getNickname();
+        String frontendUrl = "http://localhost:3000";
         try {
             String accessToken = tokenUtil.createToken(
                     member.getId(),
                     userId,
                     member.getMemberType()
             );
-
-            String tokenData = UUID.randomUUID() + ":" + userId;
-            String refreshToken = Base64.getEncoder().encodeToString(tokenData.getBytes());
-            redisService.save(
-                    userId,
-                    refreshToken,
-                    new TokenSubject(member.getId(), userId, member.getMemberType()));
+            String refreshToken = tokenService.createAndSaveRefreshToken(member);
 
             // Set tokens
-            response.setHeader("Authorization", "Bearer " + accessToken);
-            CookieUtil.addCookie(response, "refreshToken", refreshToken, 604800);
-            String targetUrl = CookieUtil.getCookie(request, "redirect_uri")
-                    .map(Cookie::getValue)
-                    .orElse(getDefaultTargetUrl());
+//            response.setHeader("Authorization", "Bearer " + accessToken);
+//            CookieUtil.addCookie(response, "refreshToken", refreshToken, 604800);
+//            String targetUrl = CookieUtil.getCookie(request, "redirect_uri")
+//                    .map(Cookie::getValue)
+//                    .orElse(getDefaultTargetUrl());
+//
+//            authorizationRequestRepository.removeCookies(request, response);
+//
+//            getRedirectStrategy().sendRedirect(request,response,
+//                    UriComponentsBuilder.fromUriString(targetUrl)
+//                            .queryParam("token", accessToken)
+//                            .queryParam("userId", userId)
+//                            .queryParam("nickname", nickname)
+//                            .build().toUriString());
+            Cookie cookie = cookieUtil.createCookie("refreshToken", refreshToken);
+            response.addCookie(cookie);
 
-            authorizationRequestRepository.removeCookies(request, response);
+            String targetUrl = UriComponentsBuilder.fromUriString(frontendUrl)
+                    .path("/oauth2/callback")
+                    .queryParam("token", accessToken)
+                    .queryParam("userId", userId)
+                    .queryParam("nickname", nickname)
+                    .build().toUriString();
 
-            getRedirectStrategy().sendRedirect(request,response,
-                    UriComponentsBuilder.fromUriString(targetUrl)
-                            .queryParam("token", accessToken)
-                            .queryParam("userId", userId)
-                            .queryParam("nickname", nickname)
-                            .build().toUriString());
+            authorizationRequestRepository.removeAuthorizationRequest(request, response);
+
+            getRedirectStrategy().sendRedirect(request, response, targetUrl);
 
         } catch (Exception e) {
             throw new IOException("Failed to process OAuth2AuthenticationSuccessHandler.", e);

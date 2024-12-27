@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
-import test.shop.infrastructure.security.jwt.TokenSubject;
+import test.shop.infrastructure.security.token.TokenSubject;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;

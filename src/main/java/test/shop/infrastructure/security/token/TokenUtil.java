@@ -1,4 +1,4 @@
-package test.shop.infrastructure.security.jwt;
+package test.shop.infrastructure.security.token;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,10 +16,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import test.shop.domain.model.exception.CustomTokenException;
 import test.shop.domain.model.member.MemberType;
+import test.shop.exception.web.CustomRefreshTokenFailException;
 import test.shop.infrastructure.persistence.redis.RedisService;
 
 import javax.crypto.SecretKey;
 import java.time.ZonedDateTime;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
@@ -167,10 +169,15 @@ public class TokenUtil {
 
     }
 
-    public String getUserId(String accessToken) throws JsonProcessingException {
-        String subjectStr = parseToken(accessToken).get("subject", String.class);
-        TokenSubject subject = new ObjectMapper().readValue(subjectStr, TokenSubject.class);
-        return subject.getUserId();
+    public String getUserId(String accessToken) {
+        try {
+            String subjectStr = parseToken(accessToken).get("subject", String.class);
+            TokenSubject subject = new ObjectMapper().readValue(subjectStr, TokenSubject.class);
+            return subject.getUserId();
+        } catch (JsonProcessingException e) {
+            throw new CustomTokenException("Failed to parse token payload");
+        }
+
     }
 
     /**
@@ -211,15 +218,18 @@ public class TokenUtil {
 
 
 
-    /**
-     * Refresh Token  생성
-     */
+    public String decodeUserIdFromRefreshToken(String refreshToken) {
+        try {
+            String tokenJson = new String(Base64.getDecoder().decode(refreshToken));
+            TokenData tokenData = objectMapper.readValue(tokenJson, TokenData.class);
 
-    public String createRefreshToken() {
-        return UUID.randomUUID().toString();
+            return tokenData.getUserId();
+        } catch (Exception e) {
+            throw new CustomRefreshTokenFailException("Decode userId from refresh token failed: " + e.getMessage());
+        }
+
+
     }
-
-
 
 }
 

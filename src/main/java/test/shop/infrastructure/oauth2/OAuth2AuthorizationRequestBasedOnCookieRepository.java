@@ -15,7 +15,7 @@ public class OAuth2AuthorizationRequestBasedOnCookieRepository implements Author
 
     public static final String OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME = "oauth2_auth_request";
     public static final String REDIRECT_URI_PARAM_COOKIE_NAME = "redirect_uri";
-    private static final int cookieExpireSeconds = 180;
+
     private final CookieUtil cookieUtil;
 
     @Override
@@ -35,11 +35,11 @@ public class OAuth2AuthorizationRequestBasedOnCookieRepository implements Author
         }
 
         CookieUtil.addCookie(response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME,
-                cookieUtil.serialize(authorizationRequest), cookieExpireSeconds);
+                cookieUtil.serialize(authorizationRequest));
         String redirectUriAfterLogin = request.getParameter(REDIRECT_URI_PARAM_COOKIE_NAME);
         if(StringUtils.hasText(redirectUriAfterLogin)) {
             CookieUtil.addCookie(response, REDIRECT_URI_PARAM_COOKIE_NAME,
-                    redirectUriAfterLogin, cookieExpireSeconds);
+                    redirectUriAfterLogin);
         }
     }
 

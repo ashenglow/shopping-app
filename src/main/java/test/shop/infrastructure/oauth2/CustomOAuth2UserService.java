@@ -15,7 +15,7 @@ import test.shop.infrastructure.oauth2.userinfo.OAuth2UserInfo;
 
 import java.util.Base64;
 
-@Service
+
 @RequiredArgsConstructor
 @Slf4j
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
