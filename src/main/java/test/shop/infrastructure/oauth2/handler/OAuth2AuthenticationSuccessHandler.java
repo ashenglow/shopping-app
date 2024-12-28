@@ -5,6 +5,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -29,14 +30,15 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private final TokenService tokenService;
     private final CookieUtil cookieUtil;
     private final OAuth2AuthorizationRequestBasedOnCookieRepository authorizationRequestRepository;
-
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
         Member member = oAuth2User.getMember();
         String userId = member.getUserId();
         String nickname = member.getNickname();
-        String frontendUrl = "http://localhost:3000";
+
         try {
             String accessToken = tokenUtil.createToken(
                     member.getId(),
