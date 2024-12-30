@@ -54,6 +54,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String requestURI = request.getRequestURI();
+        log.info("Processing request: {}", requestURI);
         // Check for exact matches in the whitelist
     if (WHITELIST.contains(requestURI)  || requestURI.startsWith("/swagger-ui/") || requestURI.startsWith("/v3/api-docs/") || requestURI.startsWith("/api/public/")) {
         log.info("Skipping JwtAuthFilter for whitelisted URI: {}", requestURI);
