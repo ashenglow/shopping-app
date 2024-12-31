@@ -44,7 +44,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             "/static/**",
             "/oauth2/authorization/**",    // Add OAuth2 authorization endpoint
             "/oauth2/callback/**",     // Add OAuth2 callback endpoint
-            "/api/v1/oauth2/url/**"
+            "/api/v1/oauth2/url/**",
+            "/login/oauth2/code/**"
 
 
 
