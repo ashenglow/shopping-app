@@ -66,10 +66,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             response.addCookie(cookie);
 
             String targetUrl = UriComponentsBuilder.fromUriString(frontendUrl)
-                    .path("/oauth2/callback")
-                    .queryParam("token", accessToken)
-                    .queryParam("userId", userId)
-                    .queryParam("nickname", nickname)
+                    .path("/")
+                    .fragment(String.format("oauth2/callback?token=%s&userId=%s&nickname=%s",
+                            accessToken, userId, nickname))
                     .build().toUriString();
 
             authorizationRequestRepository.removeAuthorizationRequest(request, response);
