@@ -39,7 +39,6 @@ public class SecurityConfig {
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
-    private final HeaderCheckFilter headerCheckFilter;
     private final ExtensiveHeaderDebugFilter extensiveHeaderDebugFilter;
     private static final String[] AUTH_WHITELIST = {
             "/api/public/**",
@@ -128,8 +127,7 @@ public class SecurityConfig {
         // JwtAuthFilter를 UsernamePasswordAuthenticationFilter 전에 추가
         http.addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(malformedRequestFilter(), JwtAuthFilter.class)
-                .addFilterBefore(extensiveHeaderDebugFilter, HeaderCheckFilter.class)
-                .addFilterBefore(headerCheckFilter, SecurityContextHolderFilter.class);
+                .addFilterBefore(extensiveHeaderDebugFilter, SecurityContextHolderFilter.class);
 
         //ExceptionHandler
         http.exceptionHandling((exception) -> exception
