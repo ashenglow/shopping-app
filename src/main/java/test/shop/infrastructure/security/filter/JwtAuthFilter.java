@@ -33,19 +33,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             "/api/v1/register",
             "/api/v1/logout",
             "/api/v1/refresh",
-            "/h2-console/**",
-            "/webjars/**",
+            "/h2-console",
+            "/webjars",
              "/v3/api-docs",
         "/swagger-ui",
         "/swagger-ui.html",
-            "/api/public/**",
-            "/monitoring/**",
+            "/api/public",
+            "/monitoring",
             "/favicon.ico",
-            "/static/**",
-            "/oauth2/authorization/**",    // Add OAuth2 authorization endpoint
-            "/oauth2/callback/**",     // Add OAuth2 callback endpoint
-            "/api/v1/oauth2/url/**",
-            "/login/oauth2/code/**"
+            "/static",
+            "/oauth2/authorization",    // Add OAuth2 authorization endpoint
+            "/oauth2/callback",     // Add OAuth2 callback endpoint
+            "/api/v1/oauth2/url",
+            "/login/oauth2/code"
 
 
 
@@ -53,19 +53,28 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     );
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return WHITELIST.stream().anyMatch(path::startsWith)
+                || path.contains("oauth2")
+                || path.contains("login/oauth2/code");
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
+        if (shouldNotFilter(request)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         String requestURI = request.getRequestURI();
         log.info("Processing request: {}", requestURI);
-        // Check for exact matches in the whitelist
-    if (WHITELIST.contains(requestURI)  || requestURI.startsWith("/swagger-ui/") || requestURI.startsWith("/v3/api-docs/") || requestURI.startsWith("/api/public/")) {
-        log.info("Skipping JwtAuthFilter for whitelisted URI: {}", requestURI);
-        filterChain.doFilter(request, response);
-        return;
-    }
+
         try {
   //request header 에서 token 추출
             String accessToken = tokenUtil.extractAccessToken(request);
             String userId = tokenUtil.getUserId(accessToken);
+
             if (accessToken != null && !tokenUtil.validateToken(userId, accessToken)) {
                 Long memberId = tokenUtil.getMemberId(accessToken);
                 log.debug("Extracted memberId from token: {}", memberId);
