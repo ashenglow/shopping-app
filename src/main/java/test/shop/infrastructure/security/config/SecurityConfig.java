@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -18,6 +19,7 @@ import test.shop.infrastructure.oauth2.CustomOAuth2UserService;
 import test.shop.infrastructure.oauth2.OAuth2AuthorizationRequestBasedOnCookieRepository;
 import test.shop.infrastructure.oauth2.handler.OAuth2AuthenticationFailureHandler;
 import test.shop.infrastructure.oauth2.handler.OAuth2AuthenticationSuccessHandler;
+import test.shop.infrastructure.security.filter.HeaderCheckFilter;
 import test.shop.infrastructure.security.filter.JwtAuthFilter;
 import test.shop.infrastructure.security.token.TokenUtil;
 import test.shop.infrastructure.security.filter.MalFormedRequestFilter;
@@ -35,8 +37,8 @@ public class SecurityConfig {
     private final CustomAuthEntryPointHandler customAuthEntryPointHandler;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
-    private final OAuth2AuthorizationRequestBasedOnCookieRepository oAuth2AuthorizationRepository;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final HeaderCheckFilter headerCheckFilter;
     private static final String[] AUTH_WHITELIST = {
             "/api/public/**",
             "/monitoring/**",
@@ -123,7 +125,8 @@ public class SecurityConfig {
 
         // JwtAuthFilter를 UsernamePasswordAuthenticationFilter 전에 추가
         http.addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(malformedRequestFilter(), JwtAuthFilter.class);
+                .addFilterBefore(malformedRequestFilter(), JwtAuthFilter.class)
+                .addFilterBefore(headerCheckFilter, SecurityContextHolderFilter.class);
 
         //ExceptionHandler
         http.exceptionHandling((exception) -> exception
