@@ -19,7 +19,6 @@ import test.shop.infrastructure.oauth2.CustomOAuth2UserService;
 import test.shop.infrastructure.oauth2.OAuth2AuthorizationRequestBasedOnCookieRepository;
 import test.shop.infrastructure.oauth2.handler.OAuth2AuthenticationFailureHandler;
 import test.shop.infrastructure.oauth2.handler.OAuth2AuthenticationSuccessHandler;
-import test.shop.infrastructure.security.filter.ExtensiveHeaderDebugFilter;
 import test.shop.infrastructure.security.filter.HeaderCheckFilter;
 import test.shop.infrastructure.security.filter.JwtAuthFilter;
 import test.shop.infrastructure.security.token.TokenUtil;
@@ -39,21 +38,25 @@ public class SecurityConfig {
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
-    private final ExtensiveHeaderDebugFilter extensiveHeaderDebugFilter;
+    private final HeaderCheckFilter headerCheckFilter;
     private static final String[] AUTH_WHITELIST = {
             "/api/public/**",
             "/monitoring/**",
             "/webjars/**",
-             "/h2-console/**",
-           "/v3/api-docs/**",
-        "/swagger-ui/**",
-        "/swagger-ui.html",
+            "/h2-console/**",
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html",
             "/favicon.ico",
             "/static/**",
-            "/oauth2/authorization/**",    // Add OAuth2 authorization endpoint
-            "/oauth2/callback/**",     // Add OAuth2 callback endpoint
+            "/oauth2/authorization/**",
+            "/oauth2/callback/**",
+            "/login/oauth2/code/**",
             "/api/v1/oauth2/url/**",
-                    "/login/oauth2/code/**"
+            "/api/v1/login",
+            "/api/v1/register",
+            "/api/v1/logout",
+            "/api/v1/refresh"
     };
 
 
@@ -81,69 +84,42 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        //CSRF, CORS
-        http.csrf(AbstractHttpConfigurer::disable);
-//        http.cors(httpSecurityCorsConfigurer ->
-//                httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource())
-//        );
-        http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
-//        http.cors(AbstractHttpConfigurer::disable);
-//        http.cors(cors -> {
-//            CorsConfigurationSource source = request -> {
-//                CorsConfiguration config = new CorsConfiguration();
-//                config.setAllowCredentials(true);
-//                config.addAllowedOrigin("http://localhost:3000");
-//                config.addAllowedHeader("*");
-//                config.addAllowedMethod("*");
-//                config.setExposedHeaders(Arrays.asList("Authorization", "Set-Cookie"));
-//                return config;
-//            };
-//            cors.configurationSource(source);
-//        });
-
-
-        //세션 생성, 사용 X
-        http.sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-//        FormLogin, BasicHttp 비활성
-        http.formLogin(AbstractHttpConfigurer::disable);
-        http.httpBasic(AbstractHttpConfigurer::disable);
-
         http
-                .oauth2Login(oauth2 -> oauth2
-                        .authorizationEndpoint(authorization -> authorization
-                                .baseUri("/oauth2/authorization")
-                        )
-                        .redirectionEndpoint(redirection -> redirection
-                                .baseUri("/login/oauth2/code/*")
-                        )
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService)
-                        )
-                        .failureHandler(new OAuth2AuthenticationFailureHandler())
-                        .successHandler(oAuth2AuthenticationSuccessHandler)
-                );
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable);
 
-        // JwtAuthFilter를 UsernamePasswordAuthenticationFilter 전에 추가
-        http.addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(malformedRequestFilter(), JwtAuthFilter.class)
-                .addFilterBefore(extensiveHeaderDebugFilter, SecurityContextHolderFilter.class);
+        // OAuth2 설정
+        http.oauth2Login(oauth2 -> oauth2
+                .authorizationEndpoint(authorization ->
+                        authorization.baseUri("/oauth2/authorization"))
+                .redirectionEndpoint(redirection ->
+                        redirection.baseUri("/login/oauth2/code/*"))
+                .userInfoEndpoint(userInfo ->
+                        userInfo.userService(customOAuth2UserService))
+                .failureHandler(new OAuth2AuthenticationFailureHandler())
+                .successHandler(oAuth2AuthenticationSuccessHandler)
+        );
 
-        //ExceptionHandler
-        http.exceptionHandling((exception) -> exception
+        // 필터 순서 설정
+        http.addFilterBefore(malformedRequestFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class);
+
+        // Exception 처리
+        http.exceptionHandling(exception -> exception
                 .authenticationEntryPoint(customAuthEntryPointHandler)
                 .accessDeniedHandler(customAccessDeniedHandler)
         );
 
-        //인가 설정
-        http.authorizeHttpRequests((authorize) -> authorize
+        // 권한 설정
+        http.authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(AUTH_WHITELIST).permitAll()
-                .requestMatchers("/api/public/monitoring/**").permitAll()
-                .requestMatchers("/api/public/**","/api/v1/login", "/api/v1/register", "/api/v1/logout", "/api/v1/refresh").permitAll()
-                .requestMatchers(("/api/auth/**")).authenticated()
+                .requestMatchers("/api/auth/**").authenticated()
                 .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
                 .anyRequest().authenticated()
-
         );
 
 
@@ -160,6 +136,7 @@ public class SecurityConfig {
         configuration.addAllowedOrigin("http://www.soolstore.r-e.kr");
         configuration.addAllowedOrigin("http://localhost:3000");
         configuration.addAllowedOrigin("http://localhost:8080");
+        configuration.addAllowedOrigin("https://accounts.google.com");
         configuration.addAllowedOrigin("https://open-api.kakaopay.com");
         configuration.addAllowedOrigin("https://online-pay.kakao.com");
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE", "PUT", "OPTIONS"));
