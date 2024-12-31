@@ -19,6 +19,7 @@ import test.shop.infrastructure.oauth2.CustomOAuth2UserService;
 import test.shop.infrastructure.oauth2.OAuth2AuthorizationRequestBasedOnCookieRepository;
 import test.shop.infrastructure.oauth2.handler.OAuth2AuthenticationFailureHandler;
 import test.shop.infrastructure.oauth2.handler.OAuth2AuthenticationSuccessHandler;
+import test.shop.infrastructure.security.filter.ExtensiveHeaderDebugFilter;
 import test.shop.infrastructure.security.filter.HeaderCheckFilter;
 import test.shop.infrastructure.security.filter.JwtAuthFilter;
 import test.shop.infrastructure.security.token.TokenUtil;
@@ -39,6 +40,7 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final HeaderCheckFilter headerCheckFilter;
+    private final ExtensiveHeaderDebugFilter extensiveHeaderDebugFilter;
     private static final String[] AUTH_WHITELIST = {
             "/api/public/**",
             "/monitoring/**",
@@ -126,6 +128,7 @@ public class SecurityConfig {
         // JwtAuthFilter를 UsernamePasswordAuthenticationFilter 전에 추가
         http.addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(malformedRequestFilter(), JwtAuthFilter.class)
+                .addFilterBefore(extensiveHeaderDebugFilter, HeaderCheckFilter.class)
                 .addFilterBefore(headerCheckFilter, SecurityContextHolderFilter.class);
 
         //ExceptionHandler
