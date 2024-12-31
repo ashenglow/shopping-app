@@ -124,13 +124,6 @@ public class SecurityConfig {
         // JwtAuthFilter를 UsernamePasswordAuthenticationFilter 전에 추가
         http.addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(malformedRequestFilter(), JwtAuthFilter.class);
-//        http.addFilterBefore(new OncePerRequestFilter() {
-//        @Override
-//        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException, ServletException, IOException {
-//            logger.info("Processing request: " + request.getMethod() + " " + request.getRequestURI());
-//            filterChain.doFilter(request, response);
-//        }
-//    }, UsernamePasswordAuthenticationFilter.class);
 
         //ExceptionHandler
         http.exceptionHandling((exception) -> exception
