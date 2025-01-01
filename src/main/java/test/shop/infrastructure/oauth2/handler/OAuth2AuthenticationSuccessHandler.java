@@ -47,21 +47,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             );
             String refreshToken = tokenService.createAndSaveRefreshToken(member);
 
-            // Set tokens
-//            response.setHeader("Authorization", "Bearer " + accessToken);
-//            CookieUtil.addCookie(response, "refreshToken", refreshToken, 604800);
-//            String targetUrl = CookieUtil.getCookie(request, "redirect_uri")
-//                    .map(Cookie::getValue)
-//                    .orElse(getDefaultTargetUrl());
-//
-//            authorizationRequestRepository.removeCookies(request, response);
-//
-//            getRedirectStrategy().sendRedirect(request,response,
-//                    UriComponentsBuilder.fromUriString(targetUrl)
-//                            .queryParam("token", accessToken)
-//                            .queryParam("userId", userId)
-//                            .queryParam("nickname", nickname)
-//                            .build().toUriString());
             Cookie cookie = cookieUtil.createCookie("refreshToken", refreshToken);
             response.addCookie(cookie);
 
