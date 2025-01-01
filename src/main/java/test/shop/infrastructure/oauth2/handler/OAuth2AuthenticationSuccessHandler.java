@@ -52,7 +52,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
             String targetUrl = UriComponentsBuilder.fromUriString(frontendUrl)
                     .path("/")
-                    .fragment(String.format("oauth2/callback?token=%s&userId=%s&nickname=%s",
+                    .fragment(String.format("/oauth2/callback?token=%s&userId=%s&nickname=%s",
                             accessToken, userId, nickname))
                     .build().toUriString();
 
