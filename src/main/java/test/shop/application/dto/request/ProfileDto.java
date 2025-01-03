@@ -1,11 +1,11 @@
 package test.shop.application.dto.request;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import test.shop.domain.value.Address;
 
-@Getter
-@Setter
+@Data
+@Builder
+@AllArgsConstructor
 public class ProfileDto {
     private Long id;
     private String userId;

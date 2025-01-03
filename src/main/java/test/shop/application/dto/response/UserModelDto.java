@@ -1,13 +1,14 @@
 package test.shop.application.dto.response;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import test.shop.domain.model.member.Member;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
+@Builder
 public class UserModelDto {
 
     private Long id;

@@ -37,8 +37,8 @@ public class SecurityConfig {
     private final CustomAuthEntryPointHandler customAuthEntryPointHandler;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
-    private final HeaderCheckFilter headerCheckFilter;
     private static final String[] AUTH_WHITELIST = {
             "/api/public/**",
             "/monitoring/**",
@@ -100,7 +100,7 @@ public class SecurityConfig {
                         redirection.baseUri("/login/oauth2/code/*"))
                 .userInfoEndpoint(userInfo ->
                         userInfo.userService(customOAuth2UserService))
-                .failureHandler(new OAuth2AuthenticationFailureHandler())
+                .failureHandler(oAuth2AuthenticationFailureHandler)
                 .successHandler(oAuth2AuthenticationSuccessHandler)
         );
 
