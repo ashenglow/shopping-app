@@ -34,8 +34,18 @@ public class OAuth2AuthorizationRequestBasedOnCookieRepository implements Author
             return;
         }
 
+        OAuth2AuthorizationRequest modifiedRequest;
+        // modify attributes for naver
+        if(request.getRequestURI().contains("/naver")){
+            modifiedRequest = OAuth2AuthorizationRequest.from(authorizationRequest)
+                    .attributes(attributes -> attributes.put("action", "login"))
+                    .build();
+
+        }else {
+            modifiedRequest = authorizationRequest;
+        }
         CookieUtil.addCookie(response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME,
-                cookieUtil.serialize(authorizationRequest));
+                cookieUtil.serialize(modifiedRequest));
         String redirectUriAfterLogin = request.getParameter(REDIRECT_URI_PARAM_COOKIE_NAME);
         if(StringUtils.hasText(redirectUriAfterLogin)) {
             CookieUtil.addCookie(response, REDIRECT_URI_PARAM_COOKIE_NAME,
