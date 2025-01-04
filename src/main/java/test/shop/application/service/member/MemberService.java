@@ -78,7 +78,7 @@ public class MemberService {
 
     public ProfileDto getUpdateMemberProfile(Long memberId) {
         Member member = memberRepository.findMemberById(memberId).orElseThrow(() -> new UsernameNotFoundException("Member not found"));
-        return member.toProfileDto(memberId);
+        return member.toProfileDto();
 
 
     }

@@ -14,22 +14,34 @@ public class KakaoOAuth2UserInfo extends OAuth2UserInfo {
     @Override
     @SuppressWarnings("unchecked")
     public String getName() {
-        Map<String, Object> properties = (Map<String, Object>) attributes.get("properties");
-        return (String) properties.get("name");
+        Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
+        if (kakaoAccount == null) return null;
+
+        Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
+        if (profile == null) return null;
+
+        return (String) profile.get("nickname");
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public String getEmail() {
-        Map<String, Object> properties = (Map<String, Object>) attributes.get("properties");
-        return (String) properties.get("email");
+        Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
+        if (kakaoAccount == null) return null;
+
+        return (String) kakaoAccount.get("email");
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public String getImageUrl() {
-        Map<String, Object> properties = (Map<String, Object>) attributes.get("properties");
-        return (String) properties.get("profile_image");
+        Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
+        if (kakaoAccount == null) return null;
+
+        Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
+        if (profile == null) return null;
+
+        return (String) profile.get("profile_image_url");
     }
 
     @Override

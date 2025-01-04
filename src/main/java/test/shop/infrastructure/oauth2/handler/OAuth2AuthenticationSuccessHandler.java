@@ -20,6 +20,8 @@ import test.shop.infrastructure.security.token.TokenSubject;
 import test.shop.infrastructure.security.token.TokenUtil;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.UUID;
 
@@ -38,7 +40,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         Member member = oAuth2User.getMember();
         String userId = member.getUserId();
         String nickname = member.getNickname();
-
         try {
             String accessToken = tokenUtil.createToken(
                     member.getId(),
@@ -55,7 +56,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                     .queryParam("token", accessToken)
                     .queryParam("userId", userId)
                     .queryParam("nickname", nickname)
-                    .build().toUriString();
+                    .build()
+                    .encode()
+                    .toUriString();
 
             authorizationRequestRepository.removeAuthorizationRequest(request, response);
 

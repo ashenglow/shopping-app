@@ -116,26 +116,27 @@ public class Member {
 
 
     public UserModelDto toUserModelDto(String accessToken) {
-        UserModelDto userModelDto = new UserModelDto();
-        userModelDto.setId(id);
-        userModelDto.setUserId(userId);
-        userModelDto.setEmail(email);
-        userModelDto.setNickname(nickname);
-        userModelDto.setRole(memberType.name());
-        userModelDto.setUserImg(userImg);
-        userModelDto.setAccessToken(accessToken);
-        return userModelDto;
+       return UserModelDto.builder()
+               .id(this.id)
+               .userId(this.userId)
+               .email(this.email)
+               .nickname(this.nickname)
+               .role(this.memberType.name())
+               .userImg(this.userImg)
+               .accessToken(accessToken)
+               .build();
     }
 
-    public ProfileDto toProfileDto(Long id) {
-        ProfileDto profileDto = new ProfileDto();
-        profileDto.setId(id);
-        profileDto.setUserId(userId);
-        profileDto.setNickname(nickname);
-        profileDto.setEmail(email);
-        profileDto.setPassword(password);
-        profileDto.setAddress(address);
-        return profileDto;
+    public ProfileDto toProfileDto() {
+        return ProfileDto.builder()
+                .id(this.id)
+                .userId(this.userId)
+                .nickname(this.nickname)
+                .email(this.email)
+                .password(this.password)
+                .address(this.address)
+                .build();
+
     }
 
 
