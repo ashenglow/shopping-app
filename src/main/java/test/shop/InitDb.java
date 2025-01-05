@@ -64,19 +64,19 @@ public class InitDb {
 
         public void dbInit1() {
             // Admin user
-            MemberJoinRequestDto adminUser = createAdminJoinRequestDto("user1","user1", "user1@gmail.com", "1234", new Address("Seoul", "Jongno-gu", "03181"));
+            MemberJoinRequestDto adminUser = createAdminJoinRequestDto("user1","user1", "user1@gmail.com", "1234", new Address("03175", "서울 종로구 경희궁길 6", "6"));
             // Regular users
             List<MemberJoinRequestDto> initialUsers = Arrays.asList(
-                    createMemberJoinRequestDto("user2", "user2", "user2@gmail.com", "1234", new Address("Seoul", "Gangnam-gu", "06001")),
-                    createMemberJoinRequestDto("soju_lover", "soju_lover","soju_lover@gmail.com","1234", new Address("Seoul", "Yongsan-gu", "06001")),
-                    createMemberJoinRequestDto("wine_enthusiast", "wine_enthusiast","wine_enthusiast@gmail.com", "user5678", new Address("Busan", "Haeundae-gu", "48099")),
-                    createMemberJoinRequestDto("tradition_seeker","tradition_seeker",  "tradition_seeker@gmail.com","user9012", new Address("Incheon", "Yeonsu-gu", "21999")),
-                    createMemberJoinRequestDto("casual_drinker", "casual_drinker","casual_drinker@gmail.com","user3456", new Address("Daegu", "Suseong-gu", "42188")),
-                    createMemberJoinRequestDto("soju_expert", "soju_expert","soju_expert@gmail.com","user7890", new Address("Gwangju", "Seo-gu", "61949")),
-                    createMemberJoinRequestDto("first_timer", "first_timer","first_timer@gmail.com","user2345", new Address("Daejeon", "Yuseong-gu", "34126")),
-                    createMemberJoinRequestDto("beer_novice","beer_novice","beer_novice@gmail.com", "user6789", new Address("Ulsan", "Nam-gu", "44701")),
-                    createMemberJoinRequestDto("fruit_wine_lover", "fruit_wine_lover","fruit_wine_lover@gmail.com","user0123", new Address("Sejong", "Hansol-dong", "30151")),
-                    createMemberJoinRequestDto("wine_connoisseur","wine_connoisseur",  "wine_connoisseur@gmail.com", "user4567", new Address("Jeju", "Jeju-si", "63122"))
+                    createMemberJoinRequestDto("user2", "user2", "user2@gmail.com", "1234", new Address("06265", "서울 강남구 강남대로 272 (도곡푸르지오)", "1")),
+                    createMemberJoinRequestDto("soju_lover", "soju_lover","soju_lover@gmail.com","1234", new Address("04398", "서울 용산구 녹사평대로 66 (용산푸르지오파크타운)", "2")),
+                    createMemberJoinRequestDto("wine_enthusiast", "wine_enthusiast","wine_enthusiast@gmail.com", "user5678", new Address("48060", "부산 해운대구 APEC로 17 (센텀리더스마크)", "3")),
+                    createMemberJoinRequestDto("tradition_seeker","tradition_seeker",  "tradition_seeker@gmail.com","user9012", new Address("21999", "인천 연수구 갯벌로 27 (인천대학교 이노베이션센터)", "4")),
+                    createMemberJoinRequestDto("casual_drinker", "casual_drinker","casual_drinker@gmail.com","user3456", new Address("42222", "대구 수성구 가창로221길 36-1 (드림팰리스)", "5")),
+                    createMemberJoinRequestDto("soju_expert", "soju_expert","soju_expert@gmail.com","user7890", new Address("62070", "광주 서구 개금길 27-13", "6")),
+                    createMemberJoinRequestDto("first_timer", "first_timer","first_timer@gmail.com","user2345", new Address("34128", "대전 유성구 가정로 8", "7")),
+                    createMemberJoinRequestDto("beer_novice","beer_novice","beer_novice@gmail.com", "user6789", new Address("44717", "울산 남구 갈밭로 4", "8")),
+                    createMemberJoinRequestDto("fruit_wine_lover", "fruit_wine_lover","fruit_wine_lover@gmail.com","user0123", new Address("30130", "세종특별자치시 나리로 57 (첫마을7단지)", "9")),
+                    createMemberJoinRequestDto("wine_connoisseur","wine_connoisseur",  "wine_connoisseur@gmail.com", "user4567", new Address("63275", "제주특별자치도 제주시 가령골길 1", "10"))
             );
             for (MemberJoinRequestDto dto : initialUsers) {
                 try {

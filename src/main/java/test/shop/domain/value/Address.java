@@ -7,17 +7,24 @@ import lombok.Getter;
 @Getter
 public class Address {
 
-    private String city;
-    private String street;
+    private String baseAddress;
+    private String detailAddress;
     private String zipcode;
 
     protected Address() {
 
     }
 
-    public Address(String city, String street, String zipcode) {
-        this.city = city;
-        this.street = street;
+    public Address(String zipcode, String baseAddress, String detailAddress) {
         this.zipcode = zipcode;
+        this.baseAddress = baseAddress;
+        this.detailAddress = detailAddress;
     }
+
+   public String getFullAddress() {
+        if( detailAddress == null || detailAddress.trim().isEmpty()) {
+            return baseAddress;
+        }
+        return baseAddress + ", " + detailAddress;
+   }
 }
