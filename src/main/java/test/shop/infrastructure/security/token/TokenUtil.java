@@ -220,10 +220,12 @@ public class TokenUtil {
 
     public String decodeUserIdFromRefreshToken(String refreshToken) {
         try {
-            String tokenJson = new String(Base64.getDecoder().decode(refreshToken));
-            TokenData tokenData = objectMapper.readValue(tokenJson, TokenData.class);
-
-            return tokenData.getUserId();
+           return  redisService.findAll().stream()
+                   .filter(tokenSubject ->
+                           redisService.existsByRefreshToken(tokenSubject.getUserId(), refreshToken))
+                   .findFirst()
+                   .map(TokenSubject::getUserId)
+                   .orElseThrow(() -> new CustomRefreshTokenFailException("Refresh token not found"));
         } catch (Exception e) {
             throw new CustomRefreshTokenFailException("Decode userId from refresh token failed: " + e.getMessage());
         }

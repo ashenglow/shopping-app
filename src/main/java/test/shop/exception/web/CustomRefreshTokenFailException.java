@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @AllArgsConstructor
-@Component
 public class CustomRefreshTokenFailException extends RuntimeException {
 
     public CustomRefreshTokenFailException(String message) {

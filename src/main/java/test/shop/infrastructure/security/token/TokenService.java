@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import test.shop.domain.model.member.Member;
+import test.shop.domain.model.member.MemberType;
 import test.shop.infrastructure.oauth2.util.CookieUtil;
 import test.shop.infrastructure.persistence.redis.RedisService;
 
@@ -19,14 +20,12 @@ public class TokenService {
     private final ObjectMapper objectMapper;
 
     public String createAndSaveRefreshToken(Member member) throws JsonProcessingException {
-        String userId = member.getUserId();
-        TokenData tokenData = new TokenData(
-                UUID.randomUUID().toString(),
-                userId
-        );
-        String tokenJson = objectMapper.writeValueAsString(tokenData);
-        String refreshToken = Base64.getEncoder().encodeToString(tokenJson.getBytes());
-        redisService.save(userId, refreshToken, new TokenSubject(member.getId(),userId, member.getMemberType()));
+       String refreshToken = UUID.randomUUID().toString();
+       redisService.save(
+               member.getUserId(),
+               refreshToken,
+               new TokenSubject(member.getId(), member.getUserId(), member.getMemberType() )
+       );
         return refreshToken;
 
     }
