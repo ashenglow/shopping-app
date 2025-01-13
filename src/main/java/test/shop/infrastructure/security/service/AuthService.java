@@ -16,7 +16,6 @@ import test.shop.domain.model.exception.CustomTokenException;
 import test.shop.domain.model.member.MemberType;
 import test.shop.exception.web.CustomRefreshTokenFailException;
 import test.shop.infrastructure.persistence.redis.RedisService;
-import test.shop.infrastructure.security.token.TokenData;
 import test.shop.infrastructure.security.token.TokenService;
 import test.shop.infrastructure.security.token.TokenSubject;
 import test.shop.infrastructure.security.token.TokenUtil;

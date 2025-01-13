@@ -5,6 +5,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -19,6 +20,7 @@ import test.shop.infrastructure.security.token.TokenService;
 import test.shop.infrastructure.security.token.TokenSubject;
 import test.shop.infrastructure.security.token.TokenUtil;
 
+import java.io.Console;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -27,6 +29,7 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     private final TokenUtil tokenUtil;
     private final TokenService tokenService;
@@ -59,6 +62,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                     .build()
                     .encode()
                     .toUriString();
+
+            log.info("targetUrl={}", targetUrl);
+            log.info("userId={}, nickname={}", userId, nickname);
 
             authorizationRequestRepository.removeAuthorizationRequest(request, response);
 
