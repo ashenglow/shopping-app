@@ -2,10 +2,11 @@ package test.shop.domain.model.order;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import test.shop.application.dto.request.OrderItemDto;
+import test.shop.domain.exception.NotEnoughStockException;
 import test.shop.domain.model.item.Image;
 import test.shop.domain.model.item.Item;
 import test.shop.application.dto.response.ItemDto;
-import test.shop.application.dto.request.OrderRequestDto;
 
 import java.util.stream.Collectors;
 
@@ -47,12 +48,30 @@ public class OrderItem {
     }
 
     //==생성 메서드=//
-    public static OrderItem createOrderItem(Item item,  OrderRequestDto dto) {
+    public static OrderItem createOrderItem(Item item,  OrderItemDto dto) {
+        // validate inputs
+        if(item == null || dto == null) {
+            throw new IllegalArgumentException("Item and dto must not be null");
+        }
+        if(dto.getCount() <= 0){
+            throw new IllegalArgumentException("Order Count must be greater than 0");
+        }
+
+        // create order item
         OrderItem orderItem = new OrderItem();
         orderItem.saveItem(item);
-        orderItem.savePrice(dto.getPrice());
+
+        // use item's current price to ensure price integrity
+        orderItem.savePrice(item.getPrice());
         orderItem.saveCount(dto.getCount());
-        item.removeStock(dto.getCount());
+
+        // remove stock
+        try {
+            item.removeStock(dto.getCount());
+        } catch (NotEnoughStockException e) {
+            throw new NotEnoughStockException("Not enough stock for item: " + item.getName());
+        }
+
         return orderItem;
     }
 
@@ -66,6 +85,16 @@ public class OrderItem {
         itemDto.setStockQuantity(getItem().getStockQuantity());
         itemDto.setCount(getCount());
         return itemDto;
+    }
+
+    public OrderItemDto toOrderItemDto() {
+        return OrderItemDto.builder()
+                .itemId(this.getItem().getId())
+                .count(this.getCount())
+                .price(this.getPrice())
+                .name(this.getItem().getName())
+                .thumbnailUrl(getItem().getThumbnailUrl())
+                .build();
     }
 
     //==비즈니스 로직==//

@@ -54,21 +54,18 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             Cookie cookie = cookieUtil.createCookie("refreshToken", refreshToken);
             response.addCookie(cookie);
 
-            boolean isNewUser = member.getAddress() == null ||
-                    (member.getAddress().getBaseAddress() == null || member.getAddress().getBaseAddress().trim().isEmpty());
 
             String targetUrl = UriComponentsBuilder.fromUriString(frontendUrl)
                     .path("/oauth2/callback")  
                     .queryParam("token", accessToken)
                     .queryParam("userId", userId)
                     .queryParam("nickname", nickname)
-                    .queryParam("isNewUser", isNewUser)
                     .build()
                     .encode()
                     .toUriString();
 
             log.info("targetUrl={}", targetUrl);
-            log.info("userId={}, nickname={}, isNewUser={}", userId, nickname, isNewUser);
+            log.info("userId={}, nickname={}", userId, nickname);
 
             authorizationRequestRepository.removeAuthorizationRequest(request, response);
 

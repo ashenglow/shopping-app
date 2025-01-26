@@ -1,4 +1,4 @@
-package test.shop.domain.model.exception;
+package test.shop.exception.web;
 
 public class CustomTokenException extends RuntimeException {
     public CustomTokenException() {

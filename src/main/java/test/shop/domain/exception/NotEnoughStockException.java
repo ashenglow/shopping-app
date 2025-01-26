@@ -1,4 +1,4 @@
-package test.shop.domain.model.exception;
+package test.shop.domain.exception;
 
 public class NotEnoughStockException extends RuntimeException{
 

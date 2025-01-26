@@ -10,6 +10,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import test.shop.application.dto.request.OrderItemDto;
+import test.shop.domain.exception.InvalidAddressException;
 import test.shop.domain.model.delivery.Delivery;
 import test.shop.domain.model.delivery.DeliveryStatus;
 import test.shop.domain.model.item.Item;
@@ -20,6 +23,7 @@ import test.shop.domain.model.order.OrderItem;
 import test.shop.domain.repository.ItemRepository;
 import test.shop.domain.repository.MemberRepository;
 import test.shop.domain.repository.OrderRepository;
+import test.shop.domain.value.Address;
 import test.shop.infrastructure.monitoring.aspect.QueryPerformanceMonitor;
 import test.shop.infrastructure.persistence.jpa.query.OrderQueryRepository;
 import test.shop.application.dto.response.OrderDto;
@@ -45,14 +49,19 @@ public class OrderService {
      * 주문
      */
     @Transactional
-    public Long order(Long memberId, List<OrderRequestDto> dtos) {
+    public Long order(Long memberId, OrderRequestDto orderRequest) {
         long startTime = System.currentTimeMillis();
         monitor.setCurrentStep("memberValidation");
 
         try {
+
             // Member validation
             Member member = memberRepository.findMemberById(memberId)
                     .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
+
+            //validate address before proceeding with order
+
+            validateAddress(member);
 
             // Delivery creation
             monitor.setCurrentStep("deliveryCreation");
@@ -60,7 +69,7 @@ public class OrderService {
 
             // Order items
             monitor.setCurrentStep("itemsProcessing");
-            List<OrderItem> orderItems = createOrderItems(dtos);
+            List<OrderItem> orderItems = createOrderItems(orderRequest.getOrderItems());
 
             // Order creation and save
             monitor.setCurrentStep("orderSave");
@@ -100,6 +109,17 @@ public class OrderService {
 
     }
     /**
+     * 주소 유무 확인
+     */
+    private void validateAddress(Member member){
+        Address address = member.getAddress();
+        if (address == null ||
+                !StringUtils.hasText(address.getZipcode()) ||
+                !StringUtils.hasText(address.getBaseAddress()))  {
+            throw new InvalidAddressException("Shipping address is required for checkout");
+        }
+    }
+    /**
      * 배송정보 생성
      */
     private Delivery createDelivery(Member member) {
@@ -112,14 +132,21 @@ public class OrderService {
     /**
      * 주문상품 생성
      */
-    private List<OrderItem> createOrderItems(List<OrderRequestDto> dtos) {
-        List<OrderItem> orderItems = new ArrayList<>();
-        for (OrderRequestDto dto : dtos) {
-            Item item = itemRepository.findItemById(dto.getItemId())
-                    .orElseThrow(() -> new EntityNotFoundException("item doesn't exist"));
-            orderItems.add(OrderItem.createOrderItem(item, dto));
-        }
-        return orderItems;
+    private List<OrderItem> createOrderItems(List<OrderItemDto> itemDtos) {
+       return itemDtos.stream()
+               .map(this::processOrderItem)
+               .collect(Collectors.toList());
+    }
+
+    private OrderItem processOrderItem(OrderItemDto dto) {
+        Item item = getItem(dto.getItemId());
+        return OrderItem.createOrderItem(item, dto);
+    }
+
+    private Item getItem(Long itemId) {
+        Item item = itemRepository.findItemById(itemId)
+                .orElseThrow(() -> new EntityNotFoundException("item doesn't exist"));
+        return item;
     }
 
     /**
