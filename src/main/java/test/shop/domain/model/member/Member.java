@@ -94,6 +94,14 @@ public class Member {
         this.email = email;
     }
 
+    public void updateAddress(Address address) {
+        this.address = address;
+    }
+
+    public void updatePassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
+
     public MemberJoinRequestDto toMemberJoinRequestDto() {
         return MemberJoinRequestDto.builder()
                 .id(this.id)

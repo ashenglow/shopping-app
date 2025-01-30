@@ -232,12 +232,12 @@ public class InitDb {
             return dto;
         }
 
-        private ReviewDto createReview(Long productId, Long memberId, String userId,
+        private ReviewDto createReview(Long productId, Long memberId, String nickname,
                                        double rating, String comment) {
             return ReviewDto.builder()
                     .productId(productId)
                     .memberId(memberId)
-                    .userId(userId)
+                    .nickname(nickname)
                     .rating(rating)
                     .comment(comment)
                     .build();

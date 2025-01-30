@@ -63,7 +63,7 @@ public ReviewDto toReviewDto() {
                 .id(this.id)
                 .productId(this.getItem().getId())
                 .memberId(this.getMember().getId())
-                .userId(this.getMember().getUserId())
+                .nickname(this.getMember().getNickname())
                 .userImg(this.getMember().getUserImg())
                 .rating(this.getRating())
                 .comment(this.getComment())

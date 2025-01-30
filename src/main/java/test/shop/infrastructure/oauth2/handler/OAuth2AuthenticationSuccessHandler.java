@@ -54,6 +54,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             Cookie cookie = cookieUtil.createCookie("refreshToken", refreshToken);
             response.addCookie(cookie);
 
+
             String targetUrl = UriComponentsBuilder.fromUriString(frontendUrl)
                     .path("/oauth2/callback")  
                     .queryParam("token", accessToken)

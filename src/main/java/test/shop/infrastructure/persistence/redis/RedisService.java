@@ -61,9 +61,13 @@ public class RedisService {
 
     public TokenSubject findByRefreshToken(String userId, String refreshToken) {
         try {
+            String value = hashOperations.get(userId, refreshToken);
+            System.out.println("Redis lookup - userId: " + userId + ", token: " + refreshToken); // Add log
+            System.out.println("Found value in Redis: " + value); // Add log
             return deserializeTokenSubject(hashOperations.get(userId, refreshToken));
         } catch (Exception e) {
             log.error("[RedisTemplateService findByRefreshToken error]: {}", e.getMessage());
+            e.printStackTrace();
             return null;
         }
     }
