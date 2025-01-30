@@ -1,5 +1,6 @@
 package test.shop.application.service.member;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import test.shop.domain.model.member.Member;
 import test.shop.application.dto.request.ProfileDto;
 import test.shop.domain.repository.CartRepository;
 import test.shop.domain.repository.MemberRepository;
+import test.shop.domain.value.Address;
 
 import java.util.Optional;
 
@@ -92,6 +94,13 @@ public class MemberService {
         foundMember.updateMember(dto.getPassword(), dto.getNickname(), dto.getAddress(), dto.getEmail(), dto.getUserImg());
     }
 
+    @Transactional
+    public void updateMemberAddress(Long memberId, Address address) {
+        Member member = memberRepository.findMemberById(memberId)
+                .orElseThrow(() -> new EntityNotFoundException("Member not found"));
+        member.updateAddress(address);
+        memberRepository.save(member);
+    }
     @Transactional
     public void delete(Long memberId) {
         memberRepository.deleteById(memberId);

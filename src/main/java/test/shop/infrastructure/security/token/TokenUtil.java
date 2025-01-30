@@ -14,17 +14,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import test.shop.domain.model.exception.CustomTokenException;
+import test.shop.exception.web.CustomTokenException;
 import test.shop.domain.model.member.MemberType;
 import test.shop.exception.web.CustomRefreshTokenFailException;
 import test.shop.infrastructure.persistence.redis.RedisService;
 
 import javax.crypto.SecretKey;
 import java.time.ZonedDateTime;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
-import java.util.UUID;
 
 @Slf4j
 @Component

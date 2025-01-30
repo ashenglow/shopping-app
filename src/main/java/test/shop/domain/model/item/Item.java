@@ -5,9 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Formula;
-import test.shop.application.dto.response.ResponseImageDto;
 import test.shop.domain.model.review.Review;
-import test.shop.domain.model.exception.NotEnoughStockException;
+import test.shop.domain.exception.NotEnoughStockException;
 import test.shop.application.dto.response.ProductDetailDto;
 import test.shop.application.dto.request.ProductDto;
 

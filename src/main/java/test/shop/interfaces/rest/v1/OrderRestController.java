@@ -28,9 +28,9 @@ public class OrderRestController {
 
     @PostMapping("/api/auth/v1/order/new")
     @Operation(summary = "주문 생성", description = "주문을 생성합니다.")
-    public ResponseEntity<Long> order(@RequestBody List<OrderRequestDto> dtos, HttpServletRequest request) {
+    public ResponseEntity<Long> order(@RequestBody OrderRequestDto orderRequest, HttpServletRequest request) {
         Long memberId = authService.getMemberIdFromAccessToken(request);
-        Long orderId = orderService.order(memberId, dtos);
+        Long orderId = orderService.order(memberId, orderRequest);
         return ResponseEntity.ok(orderId);
     }
 

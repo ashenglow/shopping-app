@@ -8,8 +8,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import test.shop.application.dto.request.AddressDto;
 import test.shop.application.dto.request.ProfileDto;
 import test.shop.application.service.member.MemberService;
+import test.shop.domain.value.Address;
 import test.shop.infrastructure.security.service.AuthService;
 
 @RestController
@@ -38,6 +40,20 @@ public class MemberRestController {
             form.setId(id);
             memberService.update(form);
         }
+        return ResponseEntity.ok(true);
+    }
+
+    @PostMapping("/api/auth/v1/member/address")
+    @Operation(summary = "회원 주소 업데이트", description = "회원 주소를 업데이트합니다.")
+    public ResponseEntity<Boolean> updateMemberAddress(@RequestBody AddressDto addressDto, HttpServletRequest request
+                                                       ) {
+        Long memberId = authService.getMemberIdFromAccessToken(request);
+        Address address = new Address(
+                addressDto.getAddress().getZipcode(),
+                addressDto.getAddress().getBaseAddress(),
+                addressDto.getAddress().getDetailAddress()
+        );
+        memberService.updateMemberAddress(memberId, address);
         return ResponseEntity.ok(true);
     }
 

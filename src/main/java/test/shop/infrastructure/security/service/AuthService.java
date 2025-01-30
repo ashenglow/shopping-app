@@ -1,7 +1,6 @@
 package test.shop.infrastructure.security.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import test.shop.application.dto.request.MemberJoinRequestDto;
 import test.shop.domain.model.member.Member;
-import test.shop.domain.model.exception.CustomTokenException;
+import test.shop.exception.web.CustomTokenException;
 import test.shop.domain.model.member.MemberType;
 import test.shop.exception.web.CustomRefreshTokenFailException;
 import test.shop.infrastructure.persistence.redis.RedisService;
@@ -23,8 +22,6 @@ import test.shop.application.dto.response.MemberLoginDto;
 import test.shop.application.dto.response.UserModelDto;
 import test.shop.domain.repository.MemberRepository;
 
-import java.util.Base64;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -204,10 +201,12 @@ public class AuthService {
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if (cookie.getName().equals("refreshToken")) {
+                    System.out.println("Found refresh token in cookie: " + cookie.getValue());
                     return cookie.getValue();
                 }
             }
         }
+        System.out.println("No refresh token found in cookies");
         return null;
     }
 }
