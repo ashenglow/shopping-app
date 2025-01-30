@@ -67,7 +67,7 @@ public class InitDb {
             MemberJoinRequestDto adminUser = createAdminJoinRequestDto("user1","user1", "user1@gmail.com", "1234", new Address("03175", "서울 종로구 경희궁길 6", "6"));
             // Regular users
             List<MemberJoinRequestDto> initialUsers = Arrays.asList(
-                    createMemberJoinRequestDto("user2", "user2", "user2@gmail.com", "1234", new Address("06265", "서울 강남구 강남대로 272 (도곡푸르지오)", "1123")),
+                    createMemberJoinRequestDto("user2", "user2", "user2@gmail.com", "1234", new Address("06265", "서울 강남구 강남대로 272 (도곡푸르지오)", "112")),
                     createMemberJoinRequestDto("soju_lover", "soju_lover","soju_lover@gmail.com","1234", new Address("04398", "서울 용산구 녹사평대로 66 (용산푸르지오파크타운)", "2")),
                     createMemberJoinRequestDto("wine_enthusiast", "wine_enthusiast","wine_enthusiast@gmail.com", "user5678", new Address("48060", "부산 해운대구 APEC로 17 (센텀리더스마크)", "3")),
                     createMemberJoinRequestDto("tradition_seeker","tradition_seeker",  "tradition_seeker@gmail.com","user9012", new Address("21999", "인천 연수구 갯벌로 27 (인천대학교 이노베이션센터)", "4")),
