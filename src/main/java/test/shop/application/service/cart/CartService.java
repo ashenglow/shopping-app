@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import test.shop.domain.exception.NotEnoughStockException;
 import test.shop.domain.model.cart.Cart;
 import test.shop.domain.model.cart.CartItem;
 import test.shop.domain.model.member.Member;
@@ -14,6 +15,7 @@ import test.shop.application.dto.response.ItemDto;
 import test.shop.domain.repository.CartRepository;
 import test.shop.domain.repository.ItemRepository;
 import test.shop.domain.repository.MemberRepository;
+import test.shop.infrastructure.persistence.StockManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +29,7 @@ public class CartService {
     private final CartRepository cartRepository;
     private final MemberRepository memberRepository;
     private final ItemRepository itemRepository;
+    private final StockManager<Item> stockManager;
 
 
     public List<ItemDto> getCartItems(Long memberId) {
@@ -54,9 +57,15 @@ public class CartService {
         Item item = itemRepository.findItemById(itemId)
                 .orElseThrow(() -> new EntityNotFoundException("Item not found"));
 
+        // validate stock
+        int currentStock = stockManager.getCurrentStock(itemId);
+        if (currentStock < count) {
+            throw new NotEnoughStockException("재고가 부족합니다");
+        }
         Optional<CartItem> existingCartItem = cart.getCartItems().stream()
                 .filter(cartItem -> cartItem.getItem().getId().equals(itemId))
                 .findFirst();
+
         if (existingCartItem.isPresent()) {
             CartItem cartItem = existingCartItem.get();
             cartItem.changeCount(cartItem.getCount() + count);

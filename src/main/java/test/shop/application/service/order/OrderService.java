@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import test.shop.application.dto.request.OrderItemDto;
 import test.shop.domain.exception.InvalidAddressException;
+import test.shop.domain.exception.NotEnoughStockException;
 import test.shop.domain.model.delivery.Delivery;
 import test.shop.domain.model.delivery.DeliveryStatus;
 import test.shop.domain.model.item.Item;
@@ -25,6 +26,7 @@ import test.shop.domain.repository.MemberRepository;
 import test.shop.domain.repository.OrderRepository;
 import test.shop.domain.value.Address;
 import test.shop.infrastructure.monitoring.aspect.QueryPerformanceMonitor;
+import test.shop.infrastructure.persistence.StockManager;
 import test.shop.infrastructure.persistence.jpa.query.OrderQueryRepository;
 import test.shop.application.dto.response.OrderDto;
 import test.shop.application.dto.request.OrderRequestDto;
@@ -44,6 +46,7 @@ public class OrderService {
     private final MemberRepository memberRepository;
     private final ItemRepository itemRepository;
     private final QueryPerformanceMonitor monitor;
+    private final StockManager<Item> stockManager;
 
     /**
      * 주문
@@ -56,7 +59,7 @@ public class OrderService {
         try {
 
             // Member validation
-            Member member = memberRepository.findMemberById(memberId)
+            Member member = memberRepository.findByIdWithOrders(memberId)
                     .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
 
             //validate address before proceeding with order
@@ -69,7 +72,21 @@ public class OrderService {
 
             // Order items
             monitor.setCurrentStep("itemsProcessing");
-            List<OrderItem> orderItems = createOrderItems(orderRequest.getOrderItems());
+
+            List<OrderItem> orderItems = new ArrayList<>();
+            try {
+                for (OrderItemDto dto : orderRequest.getOrderItems()) {
+                    Item item = itemRepository.findItemById(dto.getItemId())
+                            .orElseThrow(() -> new EntityNotFoundException("Item not found"));
+                    stockManager.decreaseStock(item.getId(), dto.getCount());
+
+                    OrderItem orderItem = OrderItem.createOrderItem(item, dto);
+                    orderItems.add(orderItem);
+                }
+            } catch (NotEnoughStockException e){
+                rollbackStockChanges(orderItems);
+                throw e;
+            }
 
             // Order creation and save
             monitor.setCurrentStep("orderSave");
@@ -84,12 +101,19 @@ public class OrderService {
             monitor.clearCurrentStep();
         }
     }
-    private void logOrderFlowTimings(Map<String, Long> stepTimings, long totalTime) {
-        log.info("Order Flow Execution Times:");
-        log.info("Total Execution Time: {}ms", totalTime);
-        stepTimings.forEach((step, time) ->
-                log.info("  {} : {}ms", step, time));
+
+    private void rollbackStockChanges(List<OrderItem> orderItems) {
+        orderItems.forEach(orderItem -> {
+            try {
+                stockManager.increaseStock(
+                        orderItem.getItem().getId(), orderItem.getCount()
+                );
+            }catch (Exception e){
+                log.error("Failed to rollback stock for item: {}", orderItem.getItem().getId(), e);
+            }
+        });
     }
+
 
     public OrderDto findOrderById(Long orderId) {
         Order order = orderRepository.findOrderById(orderId)
@@ -157,6 +181,12 @@ public class OrderService {
         //주문 엔티티 조회
         Order order = orderRepository.findOrderById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("order doesn't exist"));
+        order.getOrderItems().forEach(orderItem -> {
+            stockManager.increaseStock(
+                    orderItem.getItem().getId(), orderItem.getCount()
+            );
+        });
+
         //주문 취소
         order.cancel();
     }
