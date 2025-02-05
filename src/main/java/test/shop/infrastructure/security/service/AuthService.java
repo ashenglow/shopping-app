@@ -128,7 +128,7 @@ public class AuthService {
     }
 
     public String decodeRefreshToken(String refreshToken) {
-       return tokenUtil.decodeUserIdFromRefreshToken(refreshToken);
+       return redisService.decodeUserIdFromRefreshToken(refreshToken);
 
     }
 
@@ -143,19 +143,30 @@ public class AuthService {
 
     public UserModelDto refresh(String userId, String refreshToken){
         try {
-            if (refreshToken != null && redisService.existsByRefreshToken(userId, refreshToken)) {
-                TokenSubject tokenSubject = redisService.findByRefreshToken(userId, refreshToken);
-                String accessToken = tokenUtil.createToken(tokenSubject.getMemberId(), tokenSubject.getUserId(), tokenSubject.getMemberType());
-                Member member = memberRepository.findMemberByUserId(userId)
-                        .orElseThrow(() -> new CustomRefreshTokenFailException( "Refresh token fail. Member not found" ));
-                return member.toUserModelDto(accessToken);
-
-
+            if(refreshToken == null){
+                throw new CustomRefreshTokenFailException("Refresh token is missing");
             }
-        } catch (Exception e) {
-            throw new CustomRefreshTokenFailException("Refresh token not found: " + e.getMessage());
+            // redis에서 바로 조회
+            TokenSubject tokenSubject = redisService.findByRefreshToken(userId, refreshToken);
+            if(tokenSubject == null){
+                throw new CustomRefreshTokenFailException("Invalid refresh token");
+            }
+            // 새 액세스 토큰 생성
+            String accessToken = tokenUtil.createToken(
+                    tokenSubject.getMemberId(),
+                    tokenSubject.getUserId(),
+                    tokenSubject.getMemberType());
+            // DB에서 사용자 조회
+            Member member = memberRepository.findMemberByUserId(userId)
+                    .orElseThrow(() -> new CustomRefreshTokenFailException("Member not found"));
+            return member.toUserModelDto(accessToken);
+        } catch (CustomRefreshTokenFailException e) {
+            log.error("[AuthService refresh error]: {}", e.getMessage());
+            throw e;
+        }catch (Exception e) {
+            log.error("[AuthService refresh unexpected error]: {}", e.getMessage());
+            throw new CustomRefreshTokenFailException("Unexpected error during refresh: " + e.getMessage());
         }
-        return null;
     }
 
     public UserModelDto getMemberProfile(String accessToken) throws JsonProcessingException {
@@ -178,15 +189,31 @@ public class AuthService {
 
         try {
             String userId = tokenUtil.getUserId(accessToken);
-            if (redisService.existsByRefreshToken(userId, refreshToken)) {
-                redisService.delete(userId, refreshToken);
-                redisService.setValues(userId, accessToken, "logout", tokenUtil.getAccessTokenExpirationMillis(accessToken), TimeUnit.MILLISECONDS);
-                return true;
+
+            // redis에서 바로 조회(한 번만)
+            TokenSubject tokenSubject = redisService.findByRefreshToken(userId, refreshToken);
+            if(tokenSubject == null){
+                throw new CustomTokenException("Invalid refresh token");
             }
-        } catch (Exception e) {
-            throw new CustomTokenException("Refresh token not found: " + e.getMessage());
+
+            // refresh token 삭제
+            redisService.delete(userId, refreshToken);
+
+            // logout 상태 저장(access token 로그아웃 상태로 설정)
+            redisService.setValues(
+                    userId, accessToken, "logout",
+                    tokenUtil.getAccessTokenExpirationMillis(accessToken),TimeUnit.MILLISECONDS
+            );
+
+            return true;
+        } catch (CustomTokenException e){
+            log.error("[AuthService logout error]: {}", e.getMessage());
+            throw e;
+        }catch (Exception e) {
+            log.error("[AuthService logout unexpected error]: {}", e.getMessage());
+            throw new CustomTokenException("Unexpected error during logout: " + e.getMessage());
         }
-        return false;
+
     }
 
     public void clearCookie(HttpServletResponse response) {
