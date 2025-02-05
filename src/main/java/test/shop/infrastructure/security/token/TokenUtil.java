@@ -88,12 +88,19 @@ public class TokenUtil {
      * @return claims
      */
     public Claims parseToken(String accessToken) {
-        Jws<Claims> claimsJws = Jwts.parser()
-                .verifyWith(secretKey)
-                .build()
-                .parseSignedClaims(accessToken);
-        return claimsJws.getPayload();
+        try {
+            if (accessToken == null || accessToken.trim().isEmpty()) {
+                throw new CustomTokenException("Token cannot be null or empty");
+            }
 
+            Jws<Claims> claimsJws = Jwts.parser()
+                    .verifyWith(secretKey)
+                    .build()
+                    .parseSignedClaims(accessToken);
+            return claimsJws.getPayload();
+        } catch (JwtException e){
+            throw new CustomTokenException("Failed to parse token", e);
+        }
     }
 
     /**
@@ -169,6 +176,9 @@ public class TokenUtil {
 
     public String getUserId(String accessToken) {
         try {
+            if (accessToken == null || accessToken.trim().isEmpty()) {
+                throw new CustomTokenException("Token cannot be null or empty");
+            }
             String subjectStr = parseToken(accessToken).get("subject", String.class);
             TokenSubject subject = new ObjectMapper().readValue(subjectStr, TokenSubject.class);
             return subject.getUserId();
