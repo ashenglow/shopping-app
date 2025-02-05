@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
+import test.shop.exception.web.CustomRefreshTokenFailException;
 import test.shop.infrastructure.security.token.TokenSubject;
 
 import java.util.*;
@@ -51,8 +52,8 @@ public class RedisService {
     public void save(String userId, String refreshToken, TokenSubject tokenSubject) {
 
         try {
-            redisTemplate.expire(userId, 1, TimeUnit.DAYS);
             hashOperations.put(userId, refreshToken, serializeTokenSubject(tokenSubject));
+            redisTemplate.expire(userId, 1, TimeUnit.DAYS);
             log.info("[RedisTemplateService save]refreshToken: {}", refreshToken);
         } catch (Exception e) {
             log.error("[RedisTemplateService save error]: {}", e.getMessage());
@@ -62,13 +63,15 @@ public class RedisService {
     public TokenSubject findByRefreshToken(String userId, String refreshToken) {
         try {
             String value = hashOperations.get(userId, refreshToken);
-            System.out.println("Redis lookup - userId: " + userId + ", token: " + refreshToken); // Add log
-            System.out.println("Found value in Redis: " + value); // Add log
-            return deserializeTokenSubject(hashOperations.get(userId, refreshToken));
+            log.info("Redis lookup - userId: {}, token: {}", userId, refreshToken);
+            log.info("Found value in Redis: {}", value);
+            if(value == null) {
+                throw new CustomRefreshTokenFailException("Refresh token not found");
+            }
+            return deserializeTokenSubject(value);
         } catch (Exception e) {
             log.error("[RedisTemplateService findByRefreshToken error]: {}", e.getMessage());
-            e.printStackTrace();
-            return null;
+            throw new CustomRefreshTokenFailException("Redis lookup error: " + e.getMessage());
         }
     }
 
@@ -89,6 +92,24 @@ public class RedisService {
             log.info("refreshToken: {}", refreshToken);
             log.error("[RedisTemplateService existsByRefreshToken error]: {}", e.getMessage());
             throw new RuntimeException(e);
+        }
+    }
+
+    public String decodeUserIdFromRefreshToken(String refreshToken) {
+        try {
+            Set<String> userIds = redisTemplate.keys("*");
+            for (String userId : userIds) {
+                String tokenSubjectJson = hashOperations.get(userId, refreshToken);
+                if(tokenSubjectJson != null) {
+                    TokenSubject tokenSubject = deserializeTokenSubject(tokenSubjectJson);
+                    return tokenSubject.getUserId();
+                }
+            }
+            throw new CustomRefreshTokenFailException("Refresh token not found");
+        }catch (Exception e) {
+            log.error("[RedisTemplateService decodeUserIdFromRefreshToken error]: {}", e.getMessage());
+            throw new CustomRefreshTokenFailException("Decode userId from refresh token failed: " + e.getMessage());
+
         }
     }
 
