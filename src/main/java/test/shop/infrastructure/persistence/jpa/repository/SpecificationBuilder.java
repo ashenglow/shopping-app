@@ -6,7 +6,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
-import test.shop.utils.Range;
+import test.shop.common.utils.Range;
 
 import java.util.HashMap;
 import java.util.Map;

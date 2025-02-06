@@ -9,9 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import test.shop.domain.model.item.Image;
 import test.shop.domain.model.item.Item;
-import test.shop.utils.Range;
+import test.shop.common.utils.Range;
 import test.shop.application.dto.response.ProductDetailDto;
 import test.shop.application.dto.request.ProductDto;
 import test.shop.domain.repository.ItemRepository;
@@ -20,7 +19,6 @@ import test.shop.infrastructure.persistence.jpa.repository.SpecificationBuilderV
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j

@@ -5,11 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import test.shop.domain.model.member.Member;
-import test.shop.domain.model.member.MemberType;
-import test.shop.infrastructure.oauth2.util.CookieUtil;
 import test.shop.infrastructure.persistence.redis.RedisService;
 
-import java.util.Base64;
 import java.util.UUID;
 
 @Service

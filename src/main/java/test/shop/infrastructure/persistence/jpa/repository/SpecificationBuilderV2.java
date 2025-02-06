@@ -2,7 +2,7 @@ package test.shop.infrastructure.persistence.jpa.repository;
 
 import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
-import test.shop.utils.Range;
+import test.shop.common.utils.Range;
 
 import java.util.ArrayList;
 import java.util.List;
