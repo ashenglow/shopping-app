@@ -14,9 +14,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import test.shop.exception.web.CustomTokenException;
+import test.shop.common.exception.CustomTokenException;
 import test.shop.domain.model.member.MemberType;
-import test.shop.exception.web.CustomRefreshTokenFailException;
 import test.shop.infrastructure.persistence.redis.RedisService;
 
 import javax.crypto.SecretKey;

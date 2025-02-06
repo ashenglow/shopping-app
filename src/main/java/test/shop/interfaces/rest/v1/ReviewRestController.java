@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import test.shop.application.dto.request.ReviewDto;
 import test.shop.application.service.review.ReviewService;
-import test.shop.utils.Result;
+import test.shop.common.utils.Result;
 
 import java.util.List;
 @RestController
