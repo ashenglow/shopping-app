@@ -10,16 +10,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import test.shop.utils.Range;
-import test.shop.utils.Result;
+import test.shop.common.utils.Range;
+import test.shop.common.utils.Result;
 import test.shop.infrastructure.security.service.AuthService;
 import test.shop.application.dto.response.ProductDetailDto;
 import test.shop.application.dto.request.ProductDto;
-import test.shop.application.dto.request.ReviewDto;
 import test.shop.application.service.item.ItemService;
 import test.shop.application.service.review.ReviewService;
-
-import java.util.List;
 
 @RestController
 @Slf4j

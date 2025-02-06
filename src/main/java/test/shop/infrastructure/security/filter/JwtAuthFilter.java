@@ -13,7 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
-import test.shop.exception.web.CustomAuthEntryPointHandler;
+import test.shop.common.exception.CustomAuthEntryPointHandler;
 import test.shop.infrastructure.security.service.CustomUserDetailsService;
 import test.shop.infrastructure.security.token.TokenUtil;
 
