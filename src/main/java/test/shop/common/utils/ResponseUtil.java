@@ -10,6 +10,6 @@ public class ResponseUtil {
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(300, TimeUnit.SECONDS))
                 .eTag(String.valueOf(data.hashCode()))
-                .header("Vary", "Origin, Accept-Encoding");
+                .header("Vary", "Accept-Encoding");
     }
 }
