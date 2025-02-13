@@ -7,16 +7,20 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import test.shop.common.utils.Range;
+import test.shop.common.utils.ResponseUtil;
 import test.shop.common.utils.Result;
 import test.shop.infrastructure.security.service.AuthService;
 import test.shop.application.dto.response.ProductDetailDto;
 import test.shop.application.dto.request.ProductDto;
 import test.shop.application.service.item.ItemService;
 import test.shop.application.service.review.ReviewService;
+
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @Slf4j
@@ -53,35 +57,19 @@ public class ItemRestController {
             @RequestParam(name = "ratings", defaultValue = "0") double ratings) {
 
         int size = 10;
-        Range<Double> ratingsRange;
-        if(ratings ==0){
-            ratingsRange = new Range<>(0.0, 5.0); //show all ratings
-        }else{
-            ratingsRange = new Range<>(ratings, 5.0); // show ratings >= selected value
-        }
-
-
+        Range<Double> ratingsRange = ratings == 0 ?
+                new Range<>(0.0, 5.0) : new Range<>(ratings, 5.0);
         Range<Integer> priceRange = new Range<>(minPrice, maxPrice);
+
         Page<ProductDto> itemsPage = itemService.findItems(page, size, priceRange, category, ratingsRange);
         //handling error
         if (itemsPage == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.status(HttpStatus.OK).body(itemsPage);
+          return ResponseUtil.getCacheableResponse(itemsPage)
+                  .body(itemsPage);
     }
 
-
-//    @Hidden
-//    @RequestMapping("/api/public/v1/all-products")
-//    @Operation(summary = "메인 상품 목록", description = "메인의 상품 목록을 가져옵니다.")
-//    public ResponseEntity<Result<List<ProductDto>>> list() {
-//        List<ProductDto> productDtos = itemService.findAll();
-//        //handling error
-//        if (productDtos == null) {
-//            return ResponseEntity.notFound().build();
-//        }
-//        return ResponseEntity.ok(new Result<>(productDtos));
-//    }
 
     /**
      * 상품 상세
@@ -90,11 +78,13 @@ public class ItemRestController {
     @Operation(summary = "상품 상세 조회", description = "상품 상세를 가져옵니다.")
     public ResponseEntity<Result<ProductDetailDto>> detail(@PathVariable("itemId") Long itemId) {
         ProductDetailDto dto = itemService.getItemDetail(itemId);
+        Result<ProductDetailDto> result = new Result<>(dto);
         //handling error
         if (dto == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(new Result<>(dto));
+       return ResponseUtil.getCacheableResponse(result)
+               .body(result);
     }
 
 
