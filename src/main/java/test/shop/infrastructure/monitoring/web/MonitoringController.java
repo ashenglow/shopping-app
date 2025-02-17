@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import test.shop.domain.repository.DailySalesStatsRepository;
 import test.shop.infrastructure.monitoring.aspect.QueryPerformanceMonitor;
 import test.shop.infrastructure.monitoring.model.alert.Alert;
 import test.shop.infrastructure.monitoring.model.dashboard.MonitoringDashboardData;
@@ -23,6 +24,7 @@ import test.shop.infrastructure.monitoring.model.query.SlowQueryInfo;
 import test.shop.infrastructure.monitoring.service.AlertService;
 import test.shop.infrastructure.monitoring.service.MetricsAggregationService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,6 +38,9 @@ public class MonitoringController {
     private final QueryPerformanceMonitor queryPerformanceMonitor;
     private final OrderFlowMonitor orderFlowMonitor;
     private final AlertService alertService;
+    private final DailySalesStatsRepository statsRepository;
+
+
 
     @GetMapping("/metrics")
     public MonitoringDashboardData getMetrics() {
@@ -46,6 +51,31 @@ public class MonitoringController {
     public MethodMetricsData getMethodMetrics(@PathVariable String methodName){
         return metricService.getMethodMetrics(methodName);
     }
+
+    @GetMapping("/metrics/analytics")
+    public Map<String, Object> getAnalyticsMetrics() {
+        List<OrderFlowMonitor.OrderExecutionMetrics> executions = orderFlowMonitor.getRecentExecutions();
+
+        Map<String, Object> analyticsMetrics = new HashMap<>();
+        analyticsMetrics.put("timestamp", LocalDateTime.now());
+        analyticsMetrics.put("processedBatches", executions.size());
+        analyticsMetrics.put("totalProcessingTime", executions.stream()
+                .mapToLong(OrderFlowMonitor.OrderExecutionMetrics::getTotalExecutionTime)
+                .sum());
+
+        // add today's sales stats if available
+        statsRepository.findByDate(LocalDate.now())
+                .ifPresent( stats -> {
+                    analyticsMetrics.put("todayStats", Map.of(
+                            "totalOrders", stats.getTotalOrders(),
+                            "totalRevenue", stats.getTotalRevenue(),
+                            "averageOrderValue", stats.getAverageOrderValue(),
+                            "categoryBreakdown", stats.getSalesByCategory()
+                    ));
+                });
+        return analyticsMetrics;
+    }
+
     @GetMapping("/metrics/items")
     public List<MethodMetricsData> getItemMetrics() {
         Set<String> itemPatterns = new HashSet<>(Arrays.asList(
