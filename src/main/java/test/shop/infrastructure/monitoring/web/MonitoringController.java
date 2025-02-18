@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import test.shop.domain.model.analytics.DailySalesStats;
 import test.shop.domain.repository.DailySalesStatsRepository;
 import test.shop.infrastructure.monitoring.aspect.QueryPerformanceMonitor;
 import test.shop.infrastructure.monitoring.model.alert.Alert;
@@ -54,26 +55,39 @@ public class MonitoringController {
 
     @GetMapping("/metrics/analytics")
     public Map<String, Object> getAnalyticsMetrics() {
-        List<OrderFlowMonitor.OrderExecutionMetrics> executions = orderFlowMonitor.getRecentExecutions();
+        List<OrderFlowMonitor.OrderExecutionMetrics> executions =
+                orderFlowMonitor.getRecentExecutions();
 
-        Map<String, Object> analyticsMetrics = new HashMap<>();
-        analyticsMetrics.put("timestamp", LocalDateTime.now());
-        analyticsMetrics.put("processedBatches", executions.size());
-        analyticsMetrics.put("totalProcessingTime", executions.stream()
-                .mapToLong(OrderFlowMonitor.OrderExecutionMetrics::getTotalExecutionTime)
-                .sum());
-
+        Map<String, Object> metrics = new HashMap<>();
+        metrics.put("timestamp", LocalDateTime.now());
+        metrics.put("batchExecutions", executions.size());
         // add today's sales stats if available
-        statsRepository.findByDate(LocalDate.now())
+        LocalDate today = LocalDate.now();
+        statsRepository.findByDate(today)
                 .ifPresent( stats -> {
-                    analyticsMetrics.put("todayStats", Map.of(
-                            "totalOrders", stats.getTotalOrders(),
-                            "totalRevenue", stats.getTotalRevenue(),
-                            "averageOrderValue", stats.getAverageOrderValue(),
-                            "categoryBreakdown", stats.getSalesByCategory()
+                    metrics.put("today", Map.of(
+                            "total", stats.getTotalOrders(),
+                            "revenue", stats.getTotalRevenue(),
+                            "averageValue", stats.getAverageOrderValue()
                     ));
+                    metrics.put("categoryBreakdown", stats.getSalesByCategory());
                 });
-        return analyticsMetrics;
+
+        // last 7 days stats
+        LocalDate weekAgo = today.minusDays(7);
+        List<DailySalesStats> weeklyStats = statsRepository.findStatsForRange(weekAgo, today);
+        metrics.put("weeklyStats", weeklyStats.stream()
+                .collect(Collectors.toMap(
+                        stats -> stats.getDate().toString(),
+                        DailySalesStats::getTotalRevenue
+                )));
+
+        // this month's total revenue
+        LocalDate monthStart = today.withDayOfMonth(1);
+        Integer monthlyRevenue = statsRepository.getTotalRevenueForDate(monthStart)
+                .orElse(0);
+        metrics.put("monthlyRevenue", monthlyRevenue);
+        return metrics;
     }
 
     @GetMapping("/metrics/items")

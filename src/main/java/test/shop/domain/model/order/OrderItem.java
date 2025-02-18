@@ -48,6 +48,7 @@ public class OrderItem {
     }
 
     //==생성 메서드=//
+
     public static OrderItem createOrderItem(Item item,  OrderItemDto dto) {
         // validate inputs
         if(item == null || dto == null) {
@@ -72,6 +73,20 @@ public class OrderItem {
             throw new NotEnoughStockException("Not enough stock for item: " + item.getName());
         }
 
+        return orderItem;
+    }
+
+    public static OrderItem createRandomOrderItem(Item item, int count) {
+        OrderItem orderItem = new OrderItem();
+        orderItem.saveItem(item);
+        orderItem.savePrice(item.getPrice());
+        orderItem.saveCount(count);
+        // remove stock
+        try {
+            item.removeStock(count);
+        } catch (NotEnoughStockException e) {
+            throw new NotEnoughStockException("Not enough stock for item: " + item.getName());
+        }
         return orderItem;
     }
 

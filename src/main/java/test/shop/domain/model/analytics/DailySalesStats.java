@@ -27,6 +27,8 @@ public class DailySalesStats {
 
     @ElementCollection
     @MapKeyEnumerated(EnumType.STRING)
+    @CollectionTable(name = "category_sales")
+    @Column(name = "sales")
     private Map<Category, Integer> salesByCategory = new HashMap<>();
 
     @Builder

@@ -1,4 +1,4 @@
-package test.shop.infrastructure.config;
+package test.shop.infrastructure.analytics.config;
 
 import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
@@ -48,18 +48,6 @@ public class SalesAnalyticsBatchConfig {
                 .reader(orderReader())
                 .processor(statsProcessor())
                 .writer(statsWriter())
-                .listener(new StepExecutionListener() {
-                    @Override
-                    public void beforeStep(StepExecution stepExecution) {
-                        monitor.setCurrentStep("analyticsProcessing");
-                    }
-
-                    @Override
-                    public ExitStatus afterStep(StepExecution stepExecution) {
-                        monitor.clearCurrentStep();
-                        return ExitStatus.COMPLETED;
-                    }
-                })
                 .build();
     }
 
@@ -74,7 +62,7 @@ public class SalesAnalyticsBatchConfig {
                 .name("orderReader")
                 .entityManagerFactory(entityManagerFactory)
                 .queryString(
-                        "SELECT o FROM Order o WHERE o.orderDate BETWEEN :startDate AND :endDate"
+                        "SELECT o FROM Order o WHERE o.createdDate BETWEEN :startDate AND :endDate"
                 )
                 .parameterValues(Map.of(
                         "startDate", yesterday.with(LocalTime.MIN),
