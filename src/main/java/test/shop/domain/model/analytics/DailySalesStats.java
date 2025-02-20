@@ -4,7 +4,10 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Cascade;
 import test.shop.domain.model.item.Category;
+import test.shop.domain.model.order.Order;
+import test.shop.domain.model.order.OrderItem;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -27,7 +30,8 @@ public class DailySalesStats {
 
     @ElementCollection
     @MapKeyEnumerated(EnumType.STRING)
-    @CollectionTable(name = "category_sales")
+    @CollectionTable(name = "sales_by_category",
+                    joinColumns = @JoinColumn(name = "daily_sales_stats_id"))
     @Column(name = "sales")
     private Map<Category, Integer> salesByCategory = new HashMap<>();
 
@@ -41,5 +45,24 @@ public class DailySalesStats {
         this.averageOrderValue = averageOrderValue;
         this.totalItems = totalItems;
         this.salesByCategory = salesByCategory;
+    }
+
+    public void addOrder(Order order) {
+        this.totalOrders++;
+        this.totalRevenue += order.getTotalPrice();
+        this.totalItems += order.getOrderItems().stream()
+                .mapToInt(OrderItem::getCount)
+                .sum();
+
+        // Update category sales
+        order.getOrderItems().forEach(item -> {
+            if (item.getItem() != null && item.getItem().getCategory() != null) {
+                Category category = item.getItem().getCategory();
+                salesByCategory.merge(category, item.getTotalPrice(), Integer::sum);
+            }
+        });
+
+        // Update average
+        this.averageOrderValue = (double) this.totalRevenue / this.totalOrders;
     }
 }

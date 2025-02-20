@@ -13,7 +13,6 @@ import java.util.Optional;
 @Repository
 public interface DailySalesStatsRepository extends JpaRepository<DailySalesStats, Long> {
     Optional<DailySalesStats> findByDate(LocalDate date);
-
     @Query("SELECT ds FROM DailySalesStats ds WHERE ds.date BETWEEN :startDate AND :endDate ORDER BY ds.date")
     List<DailySalesStats> findStatsForRange(
             @Param("startDate") LocalDate startDate,
@@ -21,4 +20,5 @@ public interface DailySalesStatsRepository extends JpaRepository<DailySalesStats
     );
     @Query("SELECT SUM(ds.totalRevenue) FROM DailySalesStats ds WHERE ds.date = :date")
     Optional<Integer> getTotalRevenueForDate(@Param("date") LocalDate date);
+    void deleteByDate(LocalDate date);
 }

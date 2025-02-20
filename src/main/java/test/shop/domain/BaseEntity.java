@@ -26,7 +26,7 @@ public abstract class BaseEntity {
     }
 
     public LocalDate getLocalDate() {
-        return LocalDate.parse(getCreatedDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        return createdDate.toLocalDate();
     }
 
     public String getLastModifiedDate() {

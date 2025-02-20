@@ -1,5 +1,6 @@
 package test.shop.infrastructure.analytics.service;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -40,6 +41,7 @@ public class AnalyticsService {
     private final DailySalesStatsRepository statsRepository;
     private final JobLauncher jobLauncher;
     private final Job generateDailySalesReport;
+    private final EntityManager entityManager;
 
     private final AtomicBoolean autoAnalyticsEnabled = new AtomicBoolean(false);
 
@@ -131,7 +133,16 @@ public class AnalyticsService {
     }
     @Transactional
     public void resetAnalytics() {
-        statsRepository.deleteAll();
-        log.info("Analytics data reset completed");
+        try {
+            // delete from the collection table
+            entityManager.createNativeQuery("DELETE FROM sales_by_category").executeUpdate();
+            //delete from the main table
+            entityManager.createNativeQuery("DELETE FROM daily_sales_stats").executeUpdate();
+
+            log.info("Analytics data reset completed");
+        }catch (Exception e){
+            log.error("Failed to reset analytics data", e);
+            throw new RuntimeException("Failed to reset analytics data", e);
+        }
     }
 }
